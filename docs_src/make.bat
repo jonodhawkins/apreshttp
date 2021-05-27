@@ -10,7 +10,7 @@ if "%SPHINXBUILD%" == "" (
 set SOURCEDIR=source
 set BUILDDIR=build
 set BUILDHTML=%BUILDDIR%"/html"
-set DOCDIR="../docs_html"
+set DOCDIR="../docs"
 
 if "%1" == "" goto help
 
@@ -28,7 +28,7 @@ if errorlevel 9009 (
 )
 
 %SPHINXBUILD% -M %1 %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% %O%
-xcopy /E /I %BUILDHTML% %DOCDIR%
+xcopy /E /I /Y %BUILDHTML% %DOCDIR%
 goto end
 
 :help
