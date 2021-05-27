@@ -1,0 +1,128 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Example Code &#8212; apreshttp 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="ApRES HTTP API Routes" href="routes.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="routes.html" title="ApRES HTTP API Routes"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">apreshttp 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Example Code</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="example-code">
+<h1>Example Code<a class="headerlink" href="#example-code" title="Permalink to this headline">¶</a></h1>
+<p>Class members are designed to have names to mimimc the REST API, so download the configuration file which would be performed by a GET request to</p>
+<blockquote>
+<div><p><a class="reference external" href="http://radar.localnet/api/system/housekeeping/config">http://radar.localnet/api/system/housekeeping/config</a></p>
+</div></blockquote>
+<p>we can do the following</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create new API object to interact with the ApRES at &quot;http://radar.localnet&quot;</span>
+<span class="n">api_instance</span> <span class="o">=</span> <span class="n">API</span><span class="p">(</span><span class="s2">&quot;http://radar.localnet&quot;</span><span class="p">)</span>
+
+<span class="c1"># Download the latest config file to the current working directory</span>
+<span class="c1"># Note that the members system.housekeeping.config match the REST URL</span>
+
+<span class="k">if</span> <span class="n">api_instance</span><span class="o">.</span><span class="n">system</span><span class="o">.</span><span class="n">housekeeping</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">download</span><span class="p">(</span><span class="s2">&quot;my_config_file.ini&quot;</span><span class="p">):</span>
+  <span class="c1"># File downloaded successfully</span>
+  <span class="o">...</span> <span class="n">do</span> <span class="n">something</span> <span class="k">with</span> <span class="n">the</span> <span class="n">config</span> <span class="n">file</span>
+</pre></div>
+</div>
+<p>To check the ApRES status, using the previously created instance of the API</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Try to get the status</span>
+<span class="k">try</span><span class="p">:</span>
+  <span class="n">status</span> <span class="o">=</span> <span class="n">api_instance</span><span class="o">.</span><span class="n">system</span><span class="o">.</span><span class="n">housekeeping</span><span class="o">.</span><span class="n">status</span><span class="p">()</span>
+<span class="k">except</span><span class="p">:</span>
+  <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Something went wrong!&quot;</span><span class="p">)</span>
+
+<span class="c1"># Check that battery voltage</span>
+<span class="k">if</span> <span class="n">status</span><span class="o">.</span><span class="n">batteryVoltage</span> <span class="o">&gt;</span> <span class="mf">5.5</span><span class="p">:</span>
+  <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Battery okay.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="routes.html"
+                        title="previous chapter">ApRES HTTP API Routes</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/examples.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="routes.html" title="ApRES HTTP API Routes"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">apreshttp 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Example Code</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021 © J. D. Hawkins.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
+    </div>
+  </body>
+</html>

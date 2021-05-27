@@ -536,6 +536,8 @@ class System(APIChild):
                 with open(fileLocation, 'w') as fh:
                     print(response.text, file=fh)
 
+                return True
+
             def upload(self, fileLocation = None):
                 """
                 Upload new ApRES config.ini file from the filesystem

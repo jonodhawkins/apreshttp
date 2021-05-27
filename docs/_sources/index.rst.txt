@@ -22,6 +22,13 @@ Valid routes for the ApRES HTTP API can be found here
 
    routes
 
+For code examples of how to interact with the ApRES HTTP API, follow the link below
+
+.. toctree::
+   :maxdepth: 2
+
+   examples
+
 Indices and tables
 ==================
 
