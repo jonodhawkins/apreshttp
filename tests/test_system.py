@@ -15,6 +15,17 @@ def test_apichild_object():
 
     # Create API instance
     api = apreshttp.API(API_ROOT)
+    # Check root matches
+    assert api.root == API_ROOT
+
+    # Try testing without preceeding http://
+    api = apreshttp.API(API_ROOT[7:])
+    # Check that http:// has been added
+    assert api.root == API_ROOT
+
+    # Try testing with preceeding whitespace
+    api = apreshttp.API(hex(random.getrandbits(64))[2:] + API_ROOT)
+    assert api.root == API_ROOT
 
     # Check APIChild URL formation
     apiChild = apreshttp.APIChild(api)
