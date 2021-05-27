@@ -7,7 +7,6 @@ SPHINXOPTS    ?=
 SPHINXBUILD   ?= sphinx-build
 SOURCEDIR     = source
 BUILDDIR      = build
-DOCDIR 				= ../docs_html
 
 # Put it first so that "make" without argument is like "make help".
 help:

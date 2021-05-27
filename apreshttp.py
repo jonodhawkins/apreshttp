@@ -587,6 +587,10 @@ class System(APIChild):
 ################################################################################
 
 class Radar(APIChild):
+    """
+    Wrapper class for radar operations
+
+    """
 
     def __init__(self, api_obj):
         super().__init__(api_obj);
