@@ -1,0 +1,325 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>System class documentation &#8212; apreshttp 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Radar class documentation" href="radar.html" />
+    <link rel="prev" title="API class documentation" href="api.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="radar.html" title="Radar class documentation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="api.html" title="API class documentation"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">apreshttp 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><cite>System</cite> class documentation</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="system-class-documentation">
+<h1><cite>System</cite> class documentation<a class="headerlink" href="#system-class-documentation" title="Permalink to this headline">¶</a></h1>
+<section id="system-class">
+<h2><cite>System</cite> class<a class="headerlink" href="#system-class" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="apreshttp.System">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">apreshttp.</span></span><span class="sig-name descname"><span class="pre">System</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api_obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.System" title="Permalink to this definition">¶</a></dt>
+<dd><p>System wraps system-related API methods</p>
+<p>System provides a wrapper for the system-related functions exposed
+by the ApRES HTTP API.  This includes</p>
+<ul class="simple">
+<li><p>system/reset</p></li>
+<li><p>system/housekeeping/config</p></li>
+<li><p>system/housekeeping/status</p></li>
+</ul>
+<dl class="py method">
+<dt class="sig sig-object py" id="apreshttp.System.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api_obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.System.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assign instance of the <a class="reference internal" href="api.html#apreshttp.API" title="apreshttp.API"><code class="xref py py-class docutils literal notranslate"><span class="pre">API</span></code></a> class</p>
+<p>APIChild should inherently be a child of an <a class="reference internal" href="api.html#apreshttp.API" title="apreshttp.API"><code class="xref py py-class docutils literal notranslate"><span class="pre">API</span></code></a> object
+hence the constructor requires an instance of <a class="reference internal" href="api.html#apreshttp.API" title="apreshttp.API"><code class="xref py py-class docutils literal notranslate"><span class="pre">API</span></code></a> to
+meet this conditions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>api_obj</strong> (<a class="reference internal" href="api.html#apreshttp.API" title="apreshttp.API"><em>apreshttp.API</em></a>) – instance of <a class="reference internal" href="api.html#apreshttp.API" title="apreshttp.API"><code class="xref py py-class docutils literal notranslate"><span class="pre">API</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="apreshttp.System.ResetMessage">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">ResetMessage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.System.ResetMessage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Utility class to contain message and time from reset action</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apreshttp.System.ResetMessage.message">
+<span class="sig-name descname"><span class="pre">message</span></span><a class="headerlink" href="#apreshttp.System.ResetMessage.message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset message, including timestamp.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apreshttp.System.ResetMessage.time">
+<span class="sig-name descname"><span class="pre">time</span></span><a class="headerlink" href="#apreshttp.System.ResetMessage.time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Datetime object representing time of reset</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apreshttp.System.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.System.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset the ApRES</p>
+<p>Requires a valid API key to be assigned to the API object to
+perform the reset operation.</p>
+<p>No guarantee of a reset can be made, but upon successful
+reception of the request a
+<a class="reference internal" href="#apreshttp.System.ResetMessage" title="apreshttp.System.ResetMessage"><code class="xref py py-class docutils literal notranslate"><span class="pre">apreshttp.System.ResetMessage</span></code></a> object is returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><strong>BadResponseException</strong> – If the response is malformed or unexpected.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<section id="system-housekeeping-class">
+<h3><cite>System.Housekeeping class</cite><a class="headerlink" href="#system-housekeeping-class" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="apreshttp.System.Housekeeping">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">apreshttp.System.</span></span><span class="sig-name descname"><span class="pre">Housekeeping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api_obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.System.Housekeeping" title="Permalink to this definition">¶</a></dt>
+<dd><p>Housekeeping encapsulates system config and status methods</p>
+<p>The Housekeeping object should be a child of the System object
+and exposes methods to download the configuration file, upload
+and new configuration file or retrieve the radar system status,
+packaged in a :py:class:apreshttp.System.Housekeeping` object.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="apreshttp.System.Housekeeping.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api_obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.System.Housekeeping.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assign instance of the <code class="xref py py-class docutils literal notranslate"><span class="pre">API</span></code> class</p>
+<p>APIChild should inherently be a child of an <code class="xref py py-class docutils literal notranslate"><span class="pre">API</span></code> object
+hence the constructor requires an instance of <code class="xref py py-class docutils literal notranslate"><span class="pre">API</span></code> to
+meet this conditions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>api_obj</strong> (<a class="reference internal" href="api.html#apreshttp.API" title="apreshttp.API"><em>apreshttp.API</em></a>) – instance of <code class="xref py py-class docutils literal notranslate"><span class="pre">API</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="apreshttp.System.Housekeeping.Config">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">Config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api_obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.System.Housekeeping.Config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Config class facilitates up/download of the system config</p>
+<p>The Config class allows for the remote config.ini file to
+be downloaded onto the local filesystem, or a replacement
+config file to be uploaded.</p>
+<p>NOTE: The ApRES must be restarted before a newly uploaded
+config.ini file will take effect.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="apreshttp.System.Housekeeping.Config.download">
+<span class="sig-name descname"><span class="pre">download</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileLocation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.System.Housekeeping.Config.download" title="Permalink to this definition">¶</a></dt>
+<dd><p>Download ApRES config.ini to the local filesystem</p>
+<p>If a directory is specified for the file location then
+the function will look for an existing <cite>config.ini</cite>
+file.  If an existing <cite>config.ini</cite> file exists in that
+directory then it will be overwritten if the overwrite
+option is enabled.</p>
+<p>If a file is specified for the file location then if it
+does not exist, it will be created.  If it does exist
+and overwrite is enabled it will be overwritten,
+otherwise a FilExistsError is raised.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fileLocation</strong> (<em>str</em>) – file system path to where the config.ini file should be downloaded</p></li>
+<li><p><strong>overwrite</strong> (<em>boolean</em>) – if the file exists, then overwrite</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>FileExistsError</strong> – Raised if the file exists and overwrite is not enabled.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apreshttp.System.Housekeeping.Config.upload">
+<span class="sig-name descname"><span class="pre">upload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileLocation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.System.Housekeeping.Config.upload" title="Permalink to this definition">¶</a></dt>
+<dd><p>Upload new ApRES config.ini file from the filesystem</p>
+<p>If a directory is specified for the file location then
+the function will look for a config.ini file within
+that directory.  Otherwise, if a file is specified
+then that is uploaded.</p>
+<p>If the file does not exist (or a file named config.ini
+within the directory) then a FileNotFoundError is
+raised.</p>
+<p>The files are renamed to config.ini by the ApRES radar
+when they are uploaded.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>fileLocation</strong> (<em>str</em>) – file system path to where the config.ini file should be uploaded from.</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>FileNotFoundError</strong> – Raised if the file at fileLocation, or a “config.ini” file within that directory, is not found.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="apreshttp.System.Housekeeping.Status">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">Status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batVoltage</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeGPS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeVAB</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">long</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.System.Housekeeping.Status" title="Permalink to this definition">¶</a></dt>
+<dd><p>Utility class for representing the ApRES system status.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apreshttp.System.Housekeeping.Status.batteryVoltage">
+<span class="sig-name descname"><span class="pre">batteryVoltage</span></span><a class="headerlink" href="#apreshttp.System.Housekeeping.Status.batteryVoltage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reported ApRES battery voltage (may be 0 if not enabled or connected)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apreshttp.System.Housekeeping.Status.latitude">
+<span class="sig-name descname"><span class="pre">latitude</span></span><a class="headerlink" href="#apreshttp.System.Housekeeping.Status.latitude" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reported latitude from GPS</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apreshttp.System.Housekeeping.Status.longitude">
+<span class="sig-name descname"><span class="pre">longitude</span></span><a class="headerlink" href="#apreshttp.System.Housekeeping.Status.longitude" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reported longitude from GPS</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apreshttp.System.Housekeeping.Status.timeGPS">
+<span class="sig-name descname"><span class="pre">timeGPS</span></span><a class="headerlink" href="#apreshttp.System.Housekeeping.Status.timeGPS" title="Permalink to this definition">¶</a></dt>
+<dd><p>GPS timestamp as a <code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code> object, if available.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apreshttp.System.Housekeeping.Status.timeVAB">
+<span class="sig-name descname"><span class="pre">timeVAB</span></span><a class="headerlink" href="#apreshttp.System.Housekeeping.Status.timeVAB" title="Permalink to this definition">¶</a></dt>
+<dd><p>VAB timestamp as a <code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code> object</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apreshttp.System.Housekeeping.status">
+<span class="sig-name descname"><span class="pre">status</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.System.Housekeeping.status" title="Permalink to this definition">¶</a></dt>
+<dd><p>Request an update on the ApRES battery, tiem, GPS, etc.</p>
+<p>Perform a GET request to system/housekeeping/status and
+wrap the response as a
+<a class="reference internal" href="#apreshttp.System.Housekeeping.Status" title="apreshttp.System.Housekeeping.Status"><code class="xref py py-class docutils literal notranslate"><span class="pre">apreshttp.System.Housekeeping.Status</span></code></a> object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><strong>BadResponseException</strong> – if the response is malformed or missing information.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>If valid a <a class="reference internal" href="#apreshttp.System.Housekeeping.Status" title="apreshttp.System.Housekeeping.Status"><code class="xref py py-class docutils literal notranslate"><span class="pre">apreshttp.System.Housekeeping.Status</span></code></a> object is returned</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#"><cite>System</cite> class documentation</a><ul>
+<li><a class="reference internal" href="#system-class"><cite>System</cite> class</a><ul>
+<li><a class="reference internal" href="#system-housekeeping-class"><cite>System.Housekeeping class</cite></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="api.html"
+                        title="previous chapter"><cite>API</cite> class documentation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="radar.html"
+                        title="next chapter"><cite>Radar</cite> class documentation</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/system.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="radar.html" title="Radar class documentation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="api.html" title="API class documentation"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">apreshttp 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><cite>System</cite> class documentation</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021 © J. D. Hawkins.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
+    </div>
+  </body>
+</html>
