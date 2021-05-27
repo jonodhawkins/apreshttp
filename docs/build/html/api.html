@@ -1,0 +1,325 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>API class documentation &#8212; apreshttp 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="System class documentation" href="system.html" />
+    <link rel="prev" title="apreshttp documentation" href="index.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="system.html" title="System class documentation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="apreshttp documentation"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">apreshttp 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><cite>API</cite> class documentation</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-apreshttp">
+<span id="api-class-documentation"></span><h1><cite>API</cite> class documentation<a class="headerlink" href="#module-apreshttp" title="Permalink to this headline">¶</a></h1>
+<p>Classes related to the top-level API entry point are described here.  The <a class="reference internal" href="#apreshttp.API" title="apreshttp.API"><code class="xref py py-class docutils literal notranslate"><span class="pre">API</span></code></a> class is instantiated to access subsequent API methods and provide the same hierarchy as the REST API describes.  The <a class="reference internal" href="#apreshttp.APIChild" title="apreshttp.APIChild"><code class="xref py py-class docutils literal notranslate"><span class="pre">APIChild</span></code></a> class is used to describe
+common methods for entry points into the API with methods to expose GET and POST requests.</p>
+<section id="api-class">
+<h2><cite>API</cite> class<a class="headerlink" href="#api-class" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="apreshttp.API">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">apreshttp.</span></span><span class="sig-name descname"><span class="pre">API</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.API" title="Permalink to this definition">¶</a></dt>
+<dd><p>Entry-point class for Python code to access HTTP ApRES API</p>
+<p>The API class exposes the system, radar and data top-level elements
+of the ApRES HTTP API.  It also exposes methods for assigning the
+API key required to perform POST requests.</p>
+<p>POST requests are used to perform operations on the radar (such as
+bursts updating configuration, etc.) and as such require the API
+key to provided.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="apreshttp.API.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.API.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialise a new instance of the API specifying the root URL</p>
+<p>Creating a new instance of the API class requires the provision
+of a root URL.</p>
+<p>The default URL used by the ApRES is</p>
+<blockquote>
+<div><p><a class="reference external" href="http://radar.localnet">http://radar.localnet</a> OR
+<a class="reference external" href="http://192.168.1.1">http://192.168.1.1</a></p>
+</div></blockquote>
+<p>The root URL is sanitised by API.assignRootURL - see this for
+further information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>root</strong> (<em>str</em>) – Root URL for the API to direct HTTP requests to</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apreshttp.API.assignRootURL">
+<span class="sig-name descname"><span class="pre">assignRootURL</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.API.assignRootURL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sanitises and assigns the value in root as the root API URL</p>
+<p>Checks whether the value in root is formatted correctly as the
+root URL for the API.</p>
+<p>Values for root can be preceeded with ‘<a class="reference external" href="http://">http://</a>’ or omit the
+‘<a class="reference external" href="http://">http://</a>’ protocol.  Trailing forward slashes will be trimmed
+from the root URL if present.</p>
+<p>Empty text at the start of the root URL is stripped, however no
+guarantee is given that the URL will connect when API functions
+are called.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>root</strong> (<em>str</em>) – root URL for the api (i.e. <a class="reference external" href="http://radar.localnet">http://radar.localnet</a>)</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>TypeError</strong> – raised if the root parameter is not a str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apreshttp.API.debug">
+<span class="sig-name descname"><span class="pre">debug</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.API.debug" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints to the default system output buffer, if debug enabled</p>
+<p>Prints to the default system output buffer, as used by the
+system <cite>print</cite> function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – unpack unnamed arguments into print</p></li>
+<li><p><strong>**kwargs</strong> – unpack named keywork arguments into print</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apreshttp.API.setKey">
+<span class="sig-name descname"><span class="pre">setKey</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.API.setKey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the API key to be used during POST requests</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>key</strong> (<em>str</em>) – string key to be used for API requests</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>InvalidAPIKeyException</strong> – raised if the key parameter is not a string or is empty.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="apichild-class">
+<h2><cite>APIChild</cite> class<a class="headerlink" href="#apichild-class" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="apreshttp.APIChild">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">apreshttp.</span></span><span class="sig-name descname"><span class="pre">APIChild</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api_obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.APIChild" title="Permalink to this definition">¶</a></dt>
+<dd><p>APIChild objects provide wrappers for POST and GET requests</p>
+<p>APIChild objects wrap the <code class="xref py py-func docutils literal notranslate"><span class="pre">requests.get()</span></code> and
+<code class="xref py py-func docutils literal notranslate"><span class="pre">requests.post()</span></code> methods to build classes to support the
+implementation of calls of GET and POST API methods.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="apreshttp.APIChild.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api_obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.APIChild.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assign instance of the <a class="reference internal" href="#apreshttp.API" title="apreshttp.API"><code class="xref py py-class docutils literal notranslate"><span class="pre">API</span></code></a> class</p>
+<p>APIChild should inherently be a child of an <a class="reference internal" href="#apreshttp.API" title="apreshttp.API"><code class="xref py py-class docutils literal notranslate"><span class="pre">API</span></code></a> object
+hence the constructor requires an instance of <a class="reference internal" href="#apreshttp.API" title="apreshttp.API"><code class="xref py py-class docutils literal notranslate"><span class="pre">API</span></code></a> to
+meet this conditions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>api_obj</strong> (<a class="reference internal" href="#apreshttp.API" title="apreshttp.API"><em>apreshttp.API</em></a>) – instance of <a class="reference internal" href="#apreshttp.API" title="apreshttp.API"><code class="xref py py-class docutils literal notranslate"><span class="pre">API</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apreshttp.APIChild.formCompleteURL">
+<span class="sig-name descname"><span class="pre">formCompleteURL</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url_part</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.APIChild.formCompleteURL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the full URL for the HTTP request</p>
+<p>Combines the API root, /api/ component and final API route into
+a complete URL, i.e.</p>
+<blockquote>
+<div><p>system/reset =&gt; <a class="reference external" href="http://radar.localnet/api/system/reset">http://radar.localnet/api/system/reset</a></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>url_part</strong> (<em>str</em>) – API route, i.e. system/reset</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apreshttp.APIChild.getRequest">
+<span class="sig-name descname"><span class="pre">getRequest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_obj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.APIChild.getRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform a GET request to the URL, passing an API key and data</p>
+<p>The URL should be a valid ApRES HTTP API URL as described in
+<a class="reference internal" href="routes.html#api-routes"><span class="std std-ref">ApRES HTTP API Routes</span></a>, without the <cite>api/</cite> or root prefix.  If the
+URL is not valid then a NotFoundException is raised.</p>
+<p>HTTP arguments can be passed using the <cite>data_obj</cite> parameter as
+a dictionary, containing named arguments ([“name”]=value).
+Acceptable value types are <cite>str</cite>, <cite>float</cite>, <cite>int</cite>.  This is the
+same as requesting a URL with a query string appended with</p>
+<blockquote>
+<div><p>?name1=value1&amp;name2=value2</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>url</strong> (<em>str</em>) – URL to be requested from the API which is append to the root in the form {root}/api/{url}</p></li>
+<li><p><strong>data_obj</strong> (<em>dict</em>) – Name-value pairs to be passed as HTTP args</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apreshttp.APIChild.postRequest">
+<span class="sig-name descname"><span class="pre">postRequest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_obj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">files_obj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.APIChild.postRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform a POST request to the URL, passing an API key and data</p>
+<p>The URL should be a valid ApRES HTTP API URL as described in
+<a class="reference internal" href="routes.html#api-routes"><span class="std std-ref">ApRES HTTP API Routes</span></a>, without the <cite>api/</cite> or root prefix.  If the
+URL is not valid then a NotFoundException is raised.</p>
+<p>HTTP arguments can be passed using the <cite>data_obj</cite> parameter as
+a dictionary, containing named arguments ([“name”]=value).
+Acceptable value types are <cite>str</cite>, <cite>float</cite>, <cite>int</cite>.</p>
+<p>If files are to be uploaded, then they should be provided to
+the <cite>files_obj</cite> parameter.  The HTTP variable name is the
+dictionary key and the value is two-element tuple describing
+the filename and its content
+(i.e. [“name”] = (filename, file_content)).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>url</strong> (<em>str</em>) – URL to be requested from the API.  Should not include the API root (i.e. <a class="reference external" href="http://radar.localnet/api/">http://radar.localnet/api/</a>)</p></li>
+<li><p><strong>data_obj</strong> (<em>dict</em>) – Name-value pairs to be passed as HTTP args</p></li>
+<li><p><strong>files_obj</strong> (<em>dict</em>) – Dictionary of name-value pairs, where the name represents the HTTP variable name and the value is a two-element tuple of (filename, file_content)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apreshttp.APIChild.validateResponse">
+<span class="sig-name descname"><span class="pre">validateResponse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">response</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.APIChild.validateResponse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a <cite>requests.response</cite> object and handles common errors</p>
+<p>If the response is JSON and contains the errorCode and
+errorMessage keys, then parse these and raise the appropriate
+exceptions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>response</strong> (<em>request.response object</em>) – <cite>response</cite> object returned from <a class="reference internal" href="#apreshttp.APIChild.getRequest" title="apreshttp.APIChild.getRequest"><code class="xref py py-meth docutils literal notranslate"><span class="pre">getRequest()</span></code></a> or <a class="reference internal" href="#apreshttp.APIChild.postRequest" title="apreshttp.APIChild.postRequest"><code class="xref py py-meth docutils literal notranslate"><span class="pre">postRequest()</span></code></a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>InvalidAPIKeyException</strong> – API key is invalid</p></li>
+<li><p><strong>NotFoundException</strong> – Requested URL was not found/invalid</p></li>
+<li><p><strong>InternalRadarErrorException</strong> – Problem with the radar described in the error text.</p></li>
+<li><p><strong>RadarBusyException</strong> – Radar could not perform requested task because it is busy.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#"><cite>API</cite> class documentation</a><ul>
+<li><a class="reference internal" href="#api-class"><cite>API</cite> class</a></li>
+<li><a class="reference internal" href="#apichild-class"><cite>APIChild</cite> class</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">apreshttp documentation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="system.html"
+                        title="next chapter"><cite>System</cite> class documentation</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/api.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="system.html" title="System class documentation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="apreshttp documentation"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">apreshttp 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><cite>API</cite> class documentation</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021 © J. D. Hawkins.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
+    </div>
+  </body>
+</html>
