@@ -47,6 +47,205 @@
             
   <section id="radar-class-documentation">
 <h1><cite>Radar</cite> class documentation<a class="headerlink" href="#radar-class-documentation" title="Permalink to this headline">¶</a></h1>
+<section id="radar-class">
+<h2><cite>Radar</cite> class<a class="headerlink" href="#radar-class" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="apreshttp.Radar">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">apreshttp.</span></span><span class="sig-name descname"><span class="pre">Radar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api_obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Radar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper class for radar operation and configuration</p>
+<p>The Radar class exposes methods in the API to update the chirp
+settings, perform trial bursts and collect results, and perform
+a radar measurement (burst).</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="apreshttp.Radar.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api_obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Radar.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assign instance of the <a class="reference internal" href="api.html#apreshttp.API" title="apreshttp.API"><code class="xref py py-class docutils literal notranslate"><span class="pre">API</span></code></a> class</p>
+<p>APIChild should inherently be a child of an <a class="reference internal" href="api.html#apreshttp.API" title="apreshttp.API"><code class="xref py py-class docutils literal notranslate"><span class="pre">API</span></code></a> object
+hence the constructor requires an instance of <a class="reference internal" href="api.html#apreshttp.API" title="apreshttp.API"><code class="xref py py-class docutils literal notranslate"><span class="pre">API</span></code></a> to
+meet this conditions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>api_obj</strong> (<a class="reference internal" href="api.html#apreshttp.API" title="apreshttp.API"><em>apreshttp.API</em></a>) – instance of <a class="reference internal" href="api.html#apreshttp.API" title="apreshttp.API"><code class="xref py py-class docutils literal notranslate"><span class="pre">API</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apreshttp.Radar.burst">
+<span class="sig-name descname"><span class="pre">burst</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Radar.burst" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform a measurement radar burst using the current config</p>
+<p>Attempts to start an asynchronous radar burst, using the
+current configuration.  Also retrieves configuration from the
+API.</p>
+<p>If the burst starts successfully then the response status code
+should be 303 and redirect to the “results” API route.</p>
+<p>If the status code is 403 then something is preventing the
+radar from starting the burst.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><strong>BurstNotStartedException</strong> – Raised if the API returns a 403 indicating the radar cannot start the burst.  Might happen if the burst is already started, for example.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apreshttp.Radar.config">
+<span class="sig-name descname"><span class="pre">config</span></span><a class="headerlink" href="#apreshttp.Radar.config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Instance of a Radar.Config object which gets and sets the radar chirp config.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apreshttp.Radar.trialBurst">
+<span class="sig-name descname"><span class="pre">trialBurst</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Radar.trialBurst" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform a trial burst using the current configuration</p>
+<p>Attempts to start an asynchronous trial radar burst, using the
+current configuration. Also retrieves configuration from the
+API.</p>
+<p>If the burst starts successfully then the response status code
+should be 303 and redirect to the “results” API route.</p>
+<p>If the status code is 403 then something is preventing the
+radar from starting the burst.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><strong>BurstNotStartedException</strong> – Raised if the API returns a 403 indicating the radar cannot start the burst.  Might happen if the burst is already started, for example.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="radar-config-class">
+<h2><cite>Radar.Config</cite> class<a class="headerlink" href="#radar-config-class" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="apreshttp.Radar.Config">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">apreshttp.Radar.</span></span><span class="sig-name descname"><span class="pre">Config</span></span><a class="headerlink" href="#apreshttp.Radar.Config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve and modify radar burst configuration</p>
+<p>The Radar.Config class can be updated from the API using the <a class="reference internal" href="#apreshttp.Radar.Config.get" title="apreshttp.Radar.Config.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> method.</p>
+<p>If it is desired to change values, such as individual
+attenuator settings or the number of sub-bursts, then the
+<a class="reference internal" href="#apreshttp.Radar.Config.set" title="apreshttp.Radar.Config.set"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set()</span></code></a> method should be used.</p>
+<p>NOTE: when instance attributes, such as <a class="reference internal" href="#apreshttp.Radar.Config.nAttenuators" title="apreshttp.Radar.Config.nAttenuators"><code class="xref py py-attr docutils literal notranslate"><span class="pre">nAttenuators</span></code></a>
+are accessed, these are not automatically updated from the API
+and default to their last values, hence care should be taken
+to call <a class="reference internal" href="#apreshttp.Radar.Config.get" title="apreshttp.Radar.Config.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> when it is desired to have the most
+recent configuration values.</p>
+<p>By default, instance variables are initialised to <cite>None</cite> until
+a <a class="reference internal" href="#apreshttp.Radar.Config.get" title="apreshttp.Radar.Config.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> request is made.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apreshttp.Radar.Config.afGain">
+<span class="sig-name descname"><span class="pre">afGain</span></span><a class="headerlink" href="#apreshttp.Radar.Config.afGain" title="Permalink to this definition">¶</a></dt>
+<dd><p>RF attenuator settings (list of float)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apreshttp.Radar.Config.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Radar.Config.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the latest radar burst configuration</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Returns <cite>self</cite></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>BadResponseException</strong> – Raised in the event of an unexpected error code or missing JSON keys.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apreshttp.Radar.Config.nAttenuators">
+<span class="sig-name descname"><span class="pre">nAttenuators</span></span><a class="headerlink" href="#apreshttp.Radar.Config.nAttenuators" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of attenuator settings (int)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apreshttp.Radar.Config.nSubBursts">
+<span class="sig-name descname"><span class="pre">nSubBursts</span></span><a class="headerlink" href="#apreshttp.Radar.Config.nSubBursts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of sub-bursts per burst (int)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apreshttp.Radar.Config.parseRFAttnAFGain">
+<span class="sig-name descname"><span class="pre">parseRFAttnAFGain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nAtts</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Radar.Config.parseRFAttnAFGain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validate RF attenuation and AF gain parameters to <a class="reference internal" href="#apreshttp.Radar.Config.get" title="apreshttp.Radar.Config.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ValueError</strong> – Raised if nAtts is greater than 1 and a single AF or RF value is provided.</p></li>
+<li><p><strong>KeyError</strong> – Raised if the key in <cite>arg</cite> does not match rfAttn[1-4] or afGain[1-4]</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apreshttp.Radar.Config.readResponse">
+<span class="sig-name descname"><span class="pre">readResponse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">response</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Radar.Config.readResponse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read values from a response to radar/config into Config object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><strong>BadResponseException</strong> – Raised if there are missing fields from the radar configuration JSON response.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apreshttp.Radar.Config.rfGain">
+<span class="sig-name descname"><span class="pre">rfGain</span></span><a class="headerlink" href="#apreshttp.Radar.Config.rfGain" title="Permalink to this definition">¶</a></dt>
+<dd><p>AF gain settings (list of float)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apreshttp.Radar.Config.set">
+<span class="sig-name descname"><span class="pre">set</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nAtts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nBursts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rfAttnSet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">afGainSet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Radar.Config.set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the radar burst configuration with the given parameters</p>
+<p><strong>NOTE</strong>: Calling <a class="reference internal" href="#apreshttp.Radar.Config.set" title="apreshttp.Radar.Config.set"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set()</span></code></a> will incur a call to
+<a class="reference internal" href="#apreshttp.Radar.Config.get" title="apreshttp.Radar.Config.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> to retrieve the latest configuration.</p>
+<p>To update the number of attenuators</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">Config</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">nAtts</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To update the number of sub-bursts</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">Config</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">nBursts</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To update RF attenuator or AF gain values (i.e. replace
+rfAttnSet with afGainSett)</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Update rfAttn1 to 16.5 dB</span>
+<span class="n">Config</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">rfAttnSet</span> <span class="o">=</span> <span class="mf">16.5</span><span class="p">)</span>
+<span class="c1"># Update rfAttn1, rfAttn2 and rfAttn4 using list</span>
+<span class="n">Config</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">rfAttnSet</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mf">23.5</span><span class="p">])</span>
+<span class="c1"># Update using rfAttn2 and rfAttn3 using dict</span>
+<span class="n">rfSettings</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;rfAttn2&quot;</span> <span class="p">:</span> <span class="mf">12.5</span><span class="p">,</span> <span class="s2">&quot;rfAttn3&quot;</span> <span class="p">:</span> <span class="mf">6.0</span><span class="p">}</span>
+<span class="n">Config</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">rfAttnSet</span> <span class="o">=</span> <span class="n">rfSettings</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>WARNING</strong>: If nAttenuators has been set in the same or a
+previous call to <a class="reference internal" href="#apreshttp.Radar.Config.set" title="apreshttp.Radar.Config.set"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set()</span></code></a> and an RF attenuator or AF
+gain value with an index greater than nAtts has been set,
+then an error is thrown, i.e.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set nAtts to 2, but try setting rfAttn3</span>
+<span class="n">Config</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">nAtts</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">rfAttnSet</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">])</span>
+<span class="c1"># Exception occurs!</span>
+<span class="o">...</span>
+<span class="n">Config</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">afGainSet</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">14</span><span class="p">,</span> <span class="o">-</span><span class="mi">14</span><span class="p">,</span> <span class="o">-</span><span class="mi">14</span><span class="p">])</span>
+<span class="c1"># Exception occurs (trying to change nAtts to 3)</span>
+</pre></div>
+</div>
+<p>Similarly, trying to assign a single attenuator value when
+nAttenuators is greater than 1 will cause an error</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set nAtts to 2</span>
+<span class="n">Config</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">nAtts</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+<span class="c1"># Try to assign a single attenuator value</span>
+<span class="n">Config</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">afGainSet</span> <span class="o">=</span> <span class="o">-</span><span class="mi">4</span><span class="p">)</span>
+<span class="c1"># Exception occurs</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</section>
 </section>
 
 
@@ -56,6 +255,15 @@
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#"><cite>Radar</cite> class documentation</a><ul>
+<li><a class="reference internal" href="#radar-class"><cite>Radar</cite> class</a></li>
+<li><a class="reference internal" href="#radar-config-class"><cite>Radar.Config</cite> class</a></li>
+</ul>
+</li>
+</ul>
+
   <h4>Previous topic</h4>
   <p class="topless"><a href="system.html"
                         title="previous chapter"><cite>System</cite> class documentation</a></p>

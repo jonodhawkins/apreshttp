@@ -559,6 +559,8 @@ class System(APIChild):
                 :type fileLocation: str
 
                 :raises FileNotFoundError: Raised if the file at fileLocation, or a "config.ini" file within that directory, is not found.
+                :raises NoFileUploadedError: Raised if the request was malformed and no file was uploaded.
+                :raises BadResponseException: The response was malformed or the response was not a HTTP 201 status code.
 
                 """
 
@@ -590,40 +592,377 @@ class System(APIChild):
 
 class Radar(APIChild):
     """
-    Wrapper class for radar operations
+    Wrapper class for radar operation and configuration
 
+    The Radar class exposes methods in the API to update the chirp
+    settings, perform trial bursts and collect results, and perform
+    a radar measurement (burst).
     """
 
     def __init__(self, api_obj):
         super().__init__(api_obj);
         # Create child of type Config
+        #: Instance of a Radar.Config object which gets and sets the radar chirp config.
         self.config = self.Config(api_obj)
 
+    def trialBurst(self):
+        """
+        Perform a trial burst using the current configuration
+
+        Attempts to start an asynchronous trial radar burst, using the
+        current configuration. Also retrieves configuration from the
+        API.
+
+        If the burst starts successfully then the response status code
+        should be 303 and redirect to the "results" API route.
+
+        If the status code is 403 then something is preventing the
+        radar from starting the burst.
+
+        :raises BurstNotStartedException: Raised if the API returns a 403 indicating the radar cannot start the burst.  Might happen if the burst is already started, for example.
+
+        """
+
+        # Update config locally
+        self.config.get()
+
+        # Make a POST request to trial burst
+        response = self.postRequest("radar/trial-burst")
+
+        # Check whether the burst started (any other status codes )
+        if response.status_code != 303:
+
+            # Get response
+            response_json = response.json()
+            if "errorMessage" in response_json:
+                raise BurstNotStartedException(response_json["errorMessage"])
+            else:
+                raise BurstNotStartedException
+
+    def burst(self):
+        """
+        Perform a measurement radar burst using the current config
+
+        Attempts to start an asynchronous radar burst, using the
+        current configuration.  Also retrieves configuration from the
+        API.
+
+        If the burst starts successfully then the response status code
+        should be 303 and redirect to the "results" API route.
+
+        If the status code is 403 then something is preventing the
+        radar from starting the burst.
+
+        :raises BurstNotStartedException: Raised if the API returns a 403 indicating the radar cannot start the burst.  Might happen if the burst is already started, for example.
+        """
+
+        # Update config locally
+        self.config.get()
+
+        # Make a POST request to trial burst
+        response = self.postRequest("radar/burst")
+
+        # Check whether the burst started (any other status codes )
+        if response.status_code != 303:
+
+            # Get response
+            response_json = response.json()
+            if "errorMessage" in response_json:
+                raise BurstNotStartedException(response_json["errorMessage"])
+            else:
+                raise BurstNotStartedException
+
+
+
     class Config(APIChild):
+        """
+        Retrieve and modify radar burst configuration
+
+        The Radar.Config class can be updated from the API using the :py:meth:`get` method.
+
+        If it is desired to change values, such as individual
+        attenuator settings or the number of sub-bursts, then the
+        :py:meth:`set` method should be used.
+
+        NOTE: when instance attributes, such as :py:attr:`nAttenuators`
+        are accessed, these are not automatically updated from the API
+        and default to their last values, hence care should be taken
+        to call :py:meth:`get` when it is desired to have the most
+        recent configuration values.
+
+        By default, instance variables are initialised to `None` until
+        a :py:meth:`get` request is made.
+        """
+
+        def __init__(self):
+            #: Number of attenuator settings (int)
+            self.nAttenuators = None
+            #: Number of sub-bursts per burst (int)
+            self.nSubBursts = None
+            #: RF attenuator settings (list of float)
+            self.afGain = []
+            #: AF gain settings (list of float)
+            self.rfGain = []
 
         def get(self):
+            """
+            Retrieve the latest radar burst configuration
+
+            :return: Returns `self`
+
+            :raises BadResponseException: Raised in the event of an unexpected error code or missing JSON keys.
+            """
+
             # Get response
             response = self.getRequest("radar/config")
             #
             if response.status_code != 200:
-                raise SystemHousekeepingException(
+                raise BadResponseException(
                 "Unexpected status code: {stat:d}".format(stat=response.status_code))
             else:
-                # Convert response body to JSON
-                response_json = response.json()
+                readResponse(response)
 
-                self.api.debug(response.text)
+        def readResponse(self, response):
+            """
+            Read values from a response to radar/config into Config object
 
-                # Check response has valid components
-                if not "nSubBursts" in response_json:
-                    raise BadResponseException("No nSubBursts key in response.")
-                if not "nAttenuators" in response_json:
-                    raise BadResponseException("No nAttenuators key in response.")
+            :raises BadResponseException: Raised if there are missing fields from the radar configuration JSON response.
+            """
+            # Convert response body to JSON
+            response_json = response.json()
 
-                self.nAttenuators = response_json["nAttenuators"]
-                self.nSubBursts = response_json["nSubBursts"]
+            self.api.debug(response.text)
 
+            # Check response has valid components
+            if not "nSubBursts" in response_json:
+                raise BadResponseException("No nSubBursts key in response.")
+            if not "nAttenuators" in response_json:
+                raise BadResponseException("No nAttenuators key in response.")
+
+            self.nAttenuators = response_json["nAttenuators"]
+            self.nSubBursts = response_json["nSubBursts"]
+
+            # Create empty AF gain and RF attenuation arrays
+            self.rfAttn = []
+            self.afGain = []
+            for i in range(self.nAttenuators):
+                keyVal = "rfAttn" + str(i+1)
+                if not keyVal in response_json:
+                    raise BadResponseException("Expected " + keyVal +
+                    " but not found in response.")
+                self.rfAttn.append(response_json[keyVal])
+
+                keyVal = "afGain" + str(i+1)
+                if not keyVal in response_json:
+                    raise BadResponseException("Expected " + keyVal +
+                    " but not found in response.")
+                self.afGain.append(response_json[keyVal])
+
+            # Sanity check we have the correct number of attenuators
+            if len(self.rfAttn) == self.nAttenuators \
+            and len(self.afGain) == self.nAttenuators:
                 return self
+            else:
+                raise BadResponseException("Number of attenuator settings did not match nAttenuators in response.")
+
+        def set(self, nAtts=None, nBursts=None, rfAttnSet=None, afGainSet=None):
+            """
+            Updates the radar burst configuration with the given parameters
+
+            **NOTE**: Calling :py:meth:`set` will incur a call to
+            :py:meth:`get` to retrieve the latest configuration.
+
+            To update the number of attenuators
+
+            .. code-block:: python
+
+                Config.set(nAtts = 3)
+
+            To update the number of sub-bursts
+
+            .. code-block:: python
+
+                Config.set(nBursts = 10)
+
+            To update RF attenuator or AF gain values (i.e. replace
+            rfAttnSet with afGainSett)
+
+            .. code-block:: python
+
+                # Update rfAttn1 to 16.5 dB
+                Config.set(rfAttnSet = 16.5)
+                # Update rfAttn1, rfAttn2 and rfAttn4 using list
+                Config.set(rfAttnSet = [0, 10, None, 23.5])
+                # Update using rfAttn2 and rfAttn3 using dict
+                rfSettings = {"rfAttn2" : 12.5, "rfAttn3" : 6.0}
+                Config.set(rfAttnSet = rfSettings)
+
+            **WARNING**: If nAttenuators has been set in the same or a
+            previous call to :py:meth:`set` and an RF attenuator or AF
+            gain value with an index greater than nAtts has been set,
+            then an error is thrown, i.e.
+
+            .. code-block:: python
+
+                # Set nAtts to 2, but try setting rfAttn3
+                Config.set(nAtts = 2, rfAttnSet = [0, 10, 20])
+                # Exception occurs!
+                ...
+                Config.set(afGainSet = [-14, -14, -14])
+                # Exception occurs (trying to change nAtts to 3)
+
+            Similarly, trying to assign a single attenuator value when
+            nAttenuators is greater than 1 will cause an error
+
+            .. code-block:: python
+
+                # Set nAtts to 2
+                Config.set(nAtts = 2)
+                # Try to assign a single attenuator value
+                Config.set(afGainSet = -4)
+                # Exception occurs
+
+            """
+
+            # Update parameters
+            self.get()
+
+            # Create an empty dictionary to hold data for post request
+            data_obj = dict()
+
+            if nAtts != None:
+                # Check whether nAtts is a number
+                if isinstance(nAtts, int) or isinstance(nAtts, float):
+                    data_obj["nAttenuators"] = nAtts
+                else:
+                    raise ValueError("nAtts should be numeric")
+
+            if nBursts != None:
+                # Check whether nBursts is a number
+                if isinstance(nBursts, int) or isinstance(nBursts, float):
+                    data_obj["nSubBursts"] = nBursts
+                else:
+                    raise ValueError("nBursts should be numeric")
+
+            valid_rf = None
+            if rfAttnSet != None:
+                valid_rf = parseRFAttnAFGain("rfAttn", rfAttnSet, nAtts)
+                if len(valid_rf) > 0:
+                    # Merge valid with data_obj
+                    data_obj = {**data_obj, **valid_rf}
+
+            valid_af = None
+            if afGainSet != None:
+                valid_af = parseRFAttnAFGain("afGain", afGainSet, nAtts)
+                if len(valid_af) > 0:
+                    # Merge valid with data_obj
+                    data_obj = {**data_obj, **valid_af}
+
+            # Now deal with the request
+            response = self.postRequest("radar/config", data_obj)
+
+            # Need to check status codes in response
+            if response.status_code == 400:
+                response_json = response.json()
+                raise BadResponseException(response_json['errorMessage'])
+
+            elif response.status_code == 200:
+                # Update object from response
+                readResponse(response)
+                # Check whether new values match updated values
+                if nAtts != None and nAtts != self.nAttenuators:
+                    raise DidNotUpdateException("nAttenuators did not update.")
+
+                if nBursts != None and nBursts != self.nSubBursts:
+                    raise DidNotUpdateException("nSubBursts did not update.")
+
+                if valid_rf != None:
+                    # Iterate over valid_rf
+                    for key, value in valid_rf.items():
+                        # Take last character as index
+                        idx = int(key[-1]) - 1
+                        # Check values match
+                        self.api.debug("RF Assigned: {srv:d} vs. Retrieved: {mem:}".format(srv = value, mem = self.rfAttn[idx]))
+                        if value != self.rfAttn[idx]:
+                            raise DidNotUpdateException(key + " did not update.")
+
+                if valid_af != None:
+                    # Iterate over valid_af
+                    for key, value in valid_af.items():
+                        idx = int(key[-1]) - 1
+                        # Check values match
+                        self.api.debug("AF Assigned: {srv:d} vs. Retrieved: {mem:}".format(srv = value, mem = self.afGain[idx]))
+                        if value != self.afGain[idx]:
+                            raise DidNotUpdateException(key + " did not update.")
+
+                # Return config object
+                return self
+
+
+        def parseRFAttnAFGain(self, type, arg, nAtts):
+            """
+            Validate RF attenuation and AF gain parameters to :py:meth:`get`
+
+            :raises ValueError: Raised if nAtts is greater than 1 and a single AF or RF value is provided.
+            :raises KeyError: Raised if the key in `arg` does not match rfAttn[1-4] or afGain[1-4]
+            """
+
+            # Check type is valid
+            if not (type == "rfAttn" or type == "afGain"):
+                raise Exception ("Invalid type, should be 'rfAttn' or " + "'afGain' case sensitive.")
+
+            resp = dict()
+
+            if isinstance(arg, int) or isinstance(arg, float):
+                # Value is singular - current nAtts should be 1 and
+                # updating value empty, or updating value should be 1
+                if (nAtts != None and nAtts == 1) or \
+                   (nAtts == None and self.nAtts == 1):
+                   # Assign value to rfAttn1 or afGain1
+                   resp[type + "1"] = arg
+                else:
+                    raise ValueError("nAtts or current nAttenuators > 1, cannot add a sigular " + type + " parameter")
+
+            elif isinstance(arg, list):
+                # If the argument is a list, it should have the same
+                # number of elements as nAtts or nAttenuators
+                if ((nAtts != None and len(arg) == nAtts) or (nAtts == None and len(arg) == self.nAtts)):
+                   # len(arg) must be valid, therefore iterate
+                   for i in range(len(arg)):
+                       # Check that the value is numeric
+                       if isinstance(arg[i], int) or isinstance(arg[i], float):
+                           resp[type + str(i + 1)] = arg[i]
+                           # otherwise ignore it and don't add that value
+                           # i.e. we can have [0, None, 10] and only assign
+                           #  rfAttn1 and rfAttn3 leaving rfAttn2 as is
+                else:
+                   raise ValueError("If " + type + "Set is a list, it should have the same number of elements as the number of attenuators")
+
+            elif isinstance(arg, dict):
+                # If the argument is a dictionary, then iterate over
+                # the keys and check they are valid
+                #
+                # First of all, get the correct number of attenuators
+                # and store in nAtts
+                if nAtts == None:
+                    nAtts = self.nAtts
+
+                # Create regexp for key validation
+                # (this only works if nAtts <= 9, currently 4)
+                regexp = type + "([1-" + str(nAtts) + "])"
+
+                for key, val in args.items():
+                    # Find type in the key at index 0
+                    match = re.search(regexp, key)
+                     # check that it occurs at the start
+                    if match != None and match.span()[0] == 0:
+                        resp[key] = val
+                    else:
+                        raise KeyError("Invalid key '" + key + "' in "
+                            + type + " argument.")
+
+            return resp
+
 
 ################################################################################
 # DATA
@@ -659,4 +998,7 @@ class BadResponseException(Exception):
     pass
 
 class NoFileUploadedError(Exception):
+    pass
+
+class BurstNotStartedException(Exception):
     pass
