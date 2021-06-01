@@ -70,6 +70,12 @@ meet this conditions.</p>
 </dl>
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="apreshttp.Radar.Results">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">Results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">response</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Radar.Results" title="Permalink to this definition">¶</a></dt>
+<dd><p>Container class for trial-burst results</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="apreshttp.Radar.burst">
 <span class="sig-name descname"><span class="pre">burst</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Radar.burst" title="Permalink to this definition">¶</a></dt>
@@ -95,8 +101,14 @@ radar from starting the burst.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="apreshttp.Radar.results">
+<span class="sig-name descname"><span class="pre">results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">callback</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Radar.results" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wait for results to be returned by the radar</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="apreshttp.Radar.trialBurst">
-<span class="sig-name descname"><span class="pre">trialBurst</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Radar.trialBurst" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">trialBurst</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Radar.trialBurst" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform a trial burst using the current configuration</p>
 <p>Attempts to start an asynchronous trial radar burst, using the
 current configuration. Also retrieves configuration from the
@@ -105,9 +117,31 @@ API.</p>
 should be 303 and redirect to the “results” API route.</p>
 <p>If the status code is 403 then something is preventing the
 radar from starting the burst.</p>
+<p>To parse the results from the trial burst, the below gives some
+example code:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create API instance</span>
+<span class="n">api</span> <span class="o">=</span> <span class="n">apreshttp</span><span class="o">.</span><span class="n">API</span><span class="p">(</span><span class="s2">&quot;http://radar.localnet&quot;</span><span class="p">)</span>
+<span class="n">api</span><span class="o">.</span><span class="n">API_KEY</span> <span class="o">=</span> <span class="p">[</span><span class="o">...</span><span class="p">]</span>
+
+<span class="c1"># Define callback function</span>
+<span class="k">def</span> <span class="nf">trialResultsCallback</span><span class="p">(</span><span class="n">response</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">response_json</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+        <span class="c1"># DO SOMETHING WITH RESULTS</span>
+        <span class="o">...</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Couldn&#39;t read results.&quot;</span><span class="p">)</span>
+
+<span class="c1"># Perform trial burst</span>
+<span class="n">api</span><span class="o">.</span><span class="n">radar</span><span class="o">.</span><span class="n">trialBurst</span><span class="p">(</span><span class="n">trialResultsCallback</span><span class="p">)</span> <span class="c1"># will hang until results are returned.</span>
+</pre></div>
+</div>
 <dl class="field-list simple">
-<dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><strong>BurstNotStartedException</strong> – Raised if the API returns a 403 indicating the radar cannot start the burst.  Might happen if the burst is already started, for example.</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>callback</strong> – If provided, callback is executed when results are available.  The callback function should take a single argument of type requests.response</p></li>
+<li><p><strong>wait</strong> (<em>boolean</em>) – If callback is provided, should the function halt execution or wait in a seperate thread</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -159,6 +193,12 @@ a <a class="reference internal" href="#apreshttp.Radar.Config.get" title="apresh
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="apreshttp.Radar.Config.nAverages">
+<span class="sig-name descname"><span class="pre">nAverages</span></span><a class="headerlink" href="#apreshttp.Radar.Config.nAverages" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of averages for a trial burst (int)</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="apreshttp.Radar.Config.nSubBursts">
 <span class="sig-name descname"><span class="pre">nSubBursts</span></span><a class="headerlink" href="#apreshttp.Radar.Config.nSubBursts" title="Permalink to this definition">¶</a></dt>
 <dd><p>Number of sub-bursts per burst (int)</p>
@@ -197,8 +237,19 @@ a <a class="reference internal" href="#apreshttp.Radar.Config.get" title="apresh
 
 <dl class="py method">
 <dt class="sig sig-object py" id="apreshttp.Radar.Config.set">
-<span class="sig-name descname"><span class="pre">set</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nAtts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nBursts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rfAttnSet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">afGainSet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Radar.Config.set" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">set</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nAtts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nBursts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rfAttnSet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">afGainSet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">txAnt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rxAnt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Radar.Config.set" title="Permalink to this definition">¶</a></dt>
 <dd><p>Updates the radar burst configuration with the given parameters</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nAtts</strong> (int or <cite>None</cite>) – Set the number of attenuator settings to be used (1-4)</p></li>
+<li><p><strong>nBursts</strong> (int or <cite>None</cite>) – Set the number of chirps to be averaged for a trial burst, or repeated for a full burst.</p></li>
+<li><p><strong>rfAttnSet</strong> (int, list, dict or <cite>None</cite>) – Set the values of the ApRES RF attenuator.  If using a dictionary, keys should be “rfAttn1”, “rfAttn2”, etc. and may be excluded if no update is desired.</p></li>
+<li><p><strong>afGainSet</strong> (int, list, dict or <cite>None</cite>) – Set the values of the ApRES AF gain.  If using a dictionary, keys should be “afGain1”, “afGain2”, etc. and may be exlcuded if no update is desired.</p></li>
+<li><p><strong>txAnt</strong> (<em>int</em><em> or </em><em>list</em>) – If using a MIMO board, set the active transmit antennas</p></li>
+</ul>
+</dd>
+</dl>
 <p><strong>NOTE</strong>: Calling <a class="reference internal" href="#apreshttp.Radar.Config.set" title="apreshttp.Radar.Config.set"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set()</span></code></a> will incur a call to
 <a class="reference internal" href="#apreshttp.Radar.Config.get" title="apreshttp.Radar.Config.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> to retrieve the latest configuration.</p>
 <p>To update the number of attenuators</p>
@@ -239,6 +290,15 @@ nAttenuators is greater than 1 will cause an error</p>
 <span class="c1"># Try to assign a single attenuator value</span>
 <span class="n">Config</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">afGainSet</span> <span class="o">=</span> <span class="o">-</span><span class="mi">4</span><span class="p">)</span>
 <span class="c1"># Exception occurs</span>
+</pre></div>
+</div>
+<p>If using a MIMO board, providing txAnt or rxAnt with an eight
+element tuple allows the user to choose which antennas are
+enabled, i.e.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Use the 1st, 4th and 8th antennas to transmit</span>
+<span class="n">Config</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">txAnt</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+<span class="c1"># Use the 2nd and 7th antennas to receive</span>
+<span class="n">Config</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">rxAnt</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
 </pre></div>
 </div>
 </dd></dl>

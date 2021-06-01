@@ -6,6 +6,7 @@ import os
 import re
 import requests
 import time
+import threading
 
 class API:
     """
@@ -48,7 +49,8 @@ class API:
         self.data = Data(self)
 
         # Assign default repeat requests/timeout
-        self.timeout = 30 # Seconds
+        self.timeout = 30 #: HTTP timeout in seconds
+        self.wait = 1 #: wait time between consecutive HTTP requests
 
         # Whether to output debug commands
         self.debugEnable = False
@@ -605,7 +607,7 @@ class Radar(APIChild):
         #: Instance of a Radar.Config object which gets and sets the radar chirp config.
         self.config = self.Config(api_obj)
 
-    def trialBurst(self):
+    def trialBurst(self, callback = None, wait = True):
         """
         Perform a trial burst using the current configuration
 
@@ -619,9 +621,37 @@ class Radar(APIChild):
         If the status code is 403 then something is preventing the
         radar from starting the burst.
 
-        :raises BurstNotStartedException: Raised if the API returns a 403 indicating the radar cannot start the burst.  Might happen if the burst is already started, for example.
+        To parse the results from the trial burst, the below gives some
+        example code:
+
+        .. code-block:: python
+
+            # Create API instance
+            api = apreshttp.API("http://radar.localnet")
+            api.API_KEY = [...]
+
+            # Define callback function
+            def trialResultsCallback(response):
+                try:
+                    response_json = response.json()
+                    # DO SOMETHING WITH RESULTS
+                    ...
+                except:
+                    print("Couldn't read results.")
+
+            # Perform trial burst
+            api.radar.trialBurst(trialResultsCallback) # will hang until results are returned.
+
+        :param callback: If provided, callback is executed when results are available.  The callback function should take a single argument of type requests.response
+        :type param: callable
+        :param wait: If callback is provided, should the function halt execution or wait in a seperate thread
+        :type wait: boolean
+        :type :raises BurstNotStartedException: Raised if the API returns a 403 indicating the radar cannot start the burst.  Might happen if the burst is already started, for example.
 
         """
+
+        if callback != None and not callable(callback):
+            raise TypeError("Argument 'callback' should be callable.")
 
         # Update config locally
         self.config.get()
@@ -638,6 +668,67 @@ class Radar(APIChild):
                 raise BurstNotStartedException(response_json["errorMessage"])
             else:
                 raise BurstNotStartedException
+
+        if callback != None:
+            self.results(callback, wait)
+
+    def results(self, callback, wait = True):
+        """
+        Wait for results to be returned by the radar
+        """
+
+        if not callable(callback):
+            raise TypeError("Argument 'callback' should be callable.")
+
+        # If waiting, run in the same thread
+        if wait:
+            self.__getResults(callback)
+        # Otherwise create a new thread and start it
+        else:
+            resultsThread = threading.start(self.__getResults, args=(callback))
+            resultsThread.start()
+
+
+    def __getResults(self, callback):
+        """
+        Nothing to see here...
+        """
+
+        # Update config
+        self.config.get()
+
+        # Define initiation time
+        init_time = datetime.datetime.now()
+
+        # Calculate timeout (allow 2 seconds for each chirp)
+        timeoutSeconds = self.config.nSubBursts * \
+                         self.config.nAttenuators * 2 + self.api.timeout
+
+        self.api.debug("Getting results [Timeout = {timeout:f]".format(
+            timeout=timeoutSeconds
+        ))
+
+        timeout = datetime.timedelta(seconds = timeoutSeconds)
+
+        # Loop until we timeout
+        while (datetime.datetime.now() - init_time < timeout):
+
+            # Make GET request to results
+            response = self.getRequest("radar/results")
+            response_json = response.json()
+
+            # Check if a chirp was requested
+            if response_json["status"] == "sleeping":
+                # No chirp was started so break
+                raise NoChirpStartedException
+
+            elif response_json["status"] == "chirping":
+                pass
+
+            elif response_json["status"] == "finished":
+                callback(self.Results(response))
+
+        raise ResultsTimeoutException
 
     def burst(self):
         """
@@ -672,6 +763,32 @@ class Radar(APIChild):
             else:
                 raise BurstNotStartedException
 
+    class Results:
+        """
+        Container class for trial-burst results
+        """
+        def __init__(self, response):
+
+            response_json = response.json()
+
+            if not "nAttenuators" in response_json:
+                raise BadResponseException("No key 'nAttenuators' found in results.")
+
+            if not "nAverages" in response_json:
+                raise BadResponseException("No key 'nAverages' found in results.")
+
+            self.nAttenuators = int(response_json["nAttenuators"])
+            self.nAverages = int(response_json["nAverage"])
+
+            # Create empty list for results
+            self.range = []
+
+
+            # Iterate over number of attenuators
+            for attnIdx in range(self.nAttenuators):
+                # TODO: Add code to parse results
+                pass
+
 
 
     class Config(APIChild):
@@ -699,6 +816,8 @@ class Radar(APIChild):
             self.nAttenuators = None
             #: Number of sub-bursts per burst (int)
             self.nSubBursts = None
+            #: Number of averages for a trial burst (int)
+            self.nAverages = None
             #: RF attenuator settings (list of float)
             self.afGain = []
             #: AF gain settings (list of float)
@@ -738,11 +857,14 @@ class Radar(APIChild):
                 raise BadResponseException("No nSubBursts key in response.")
             if not "nAttenuators" in response_json:
                 raise BadResponseException("No nAttenuators key in response.")
+            if not "nAverages" in response_json:
+                raise BadResponseException("No nAverages key in response.")
 
             self.nAttenuators = response_json["nAttenuators"]
             self.nSubBursts = response_json["nSubBursts"]
-
+            self.nAverages = response_json["nAverages"]
             # Create empty AF gain and RF attenuation arrays
+
             self.rfAttn = []
             self.afGain = []
             for i in range(self.nAttenuators):
@@ -765,9 +887,24 @@ class Radar(APIChild):
             else:
                 raise BadResponseException("Number of attenuator settings did not match nAttenuators in response.")
 
-        def set(self, nAtts=None, nBursts=None, rfAttnSet=None, afGainSet=None):
+        def set(
+            self, nAtts=None, nBursts=None, rfAttnSet=None, afGainSet=None,
+            txAnt=None, rxAnt=None
+        ):
             """
             Updates the radar burst configuration with the given parameters
+
+            :param nAtts: Set the number of attenuator settings to be used (1-4)
+            :type nAtts: int or `None`
+            :param nBursts: Set the number of chirps to be averaged for a trial burst, or repeated for a full burst.
+            :type nBursts: int or `None`
+            :param rfAttnSet: Set the values of the ApRES RF attenuator.  If using a dictionary, keys should be "rfAttn1", "rfAttn2", etc. and may be excluded if no update is desired.
+            :type rfAttnSet: int, list, dict or `None`
+            :param afGainSet: Set the values of the ApRES AF gain.  If using a dictionary, keys should be "afGain1", "afGain2", etc. and may be exlcuded if no update is desired.
+            :type afGainSet: int, list, dict or `None`
+            :param txAnt: If using a MIMO board, set the active transmit antennas
+
+            :type txAnt: int or list
 
             **NOTE**: Calling :py:meth:`set` will incur a call to
             :py:meth:`get` to retrieve the latest configuration.
@@ -821,6 +958,17 @@ class Radar(APIChild):
                 # Try to assign a single attenuator value
                 Config.set(afGainSet = -4)
                 # Exception occurs
+
+            If using a MIMO board, providing txAnt or rxAnt with an eight
+            element tuple allows the user to choose which antennas are
+            enabled, i.e.
+
+            .. code-block:: python
+
+                # Use the 1st, 4th and 8th antennas to transmit
+                Config.set(txAnt = (1,0,0,1,0,0,0,1))
+                # Use the 2nd and 7th antennas to receive
+                Config.set(rxAnt = (0,1,0,0,0,0,1,0))
 
             """
 
@@ -897,7 +1045,6 @@ class Radar(APIChild):
 
                 # Return config object
                 return self
-
 
         def parseRFAttnAFGain(self, type, arg, nAtts):
             """
@@ -1001,4 +1148,10 @@ class NoFileUploadedError(Exception):
     pass
 
 class BurstNotStartedException(Exception):
+    pass
+
+class NoChirpStartedException(Exception):
+    pass
+
+class ResultsTimeoutException(Exception):
     pass
