@@ -112,8 +112,8 @@ system <cite>print</cite> function.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> – unpack unnamed arguments into print</p></li>
-<li><p><strong>**kwargs</strong> – unpack named keywork arguments into print</p></li>
+<li><p><strong>args</strong> – unpack unnamed arguments into print</p></li>
+<li><p><strong>kwargs</strong> – unpack named keywork arguments into print</p></li>
 </ul>
 </dd>
 </dl>
@@ -192,7 +192,7 @@ a complete URL, i.e.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="apreshttp.APIChild.getRequest">
-<span class="sig-name descname"><span class="pre">getRequest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_obj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.APIChild.getRequest" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">getRequest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_obj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.APIChild.getRequest" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform a GET request to the URL, passing an API key and data</p>
 <p>The URL should be a valid ApRES HTTP API URL as described in
 <a class="reference internal" href="routes.html#api-routes"><span class="std std-ref">ApRES HTTP API Routes</span></a>, without the <cite>api/</cite> or root prefix.  If the
@@ -216,7 +216,7 @@ same as requesting a URL with a query string appended with</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="apreshttp.APIChild.postRequest">
-<span class="sig-name descname"><span class="pre">postRequest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_obj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">files_obj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.APIChild.postRequest" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">postRequest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_obj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">files_obj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.APIChild.postRequest" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform a POST request to the URL, passing an API key and data</p>
 <p>The URL should be a valid ApRES HTTP API URL as described in
 <a class="reference internal" href="routes.html#api-routes"><span class="std std-ref">ApRES HTTP API Routes</span></a>, without the <cite>api/</cite> or root prefix.  If the

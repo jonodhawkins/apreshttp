@@ -73,12 +73,21 @@ meet this conditions.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="apreshttp.Radar.Results">
 <em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">Results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">response</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Radar.Results" title="Permalink to this definition">¶</a></dt>
-<dd><p>Container class for trial-burst results</p>
+<dd><p>Container class for burst and trial results</p>
+<p>The <cite>type</cite> parameter can be used to determine whether the
+results arise from trial burst or a full burst, and the
+parameters will depend on this.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apreshttp.Radar.Results.type">
+<span class="sig-name descname"><span class="pre">type</span></span><a class="headerlink" href="#apreshttp.Radar.Results.type" title="Permalink to this definition">¶</a></dt>
+<dd><p>indicates whether the results are a trial or full burst</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="apreshttp.Radar.burst">
-<span class="sig-name descname"><span class="pre">burst</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Radar.burst" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">burst</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Radar.burst" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform a measurement radar burst using the current config</p>
 <p>Attempts to start an asynchronous radar burst, using the
 current configuration.  Also retrieves configuration from the
@@ -88,8 +97,18 @@ should be 303 and redirect to the “results” API route.</p>
 <p>If the status code is 403 then something is preventing the
 radar from starting the burst.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><strong>BurstNotStartedException</strong> – Raised if the API returns a 403 indicating the radar cannot start the burst.  Might happen if the burst is already started, for example.</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – filename to be used when saving the burst to an SD card.</p></li>
+<li><p><strong>callback</strong> (<em>callable</em>) – callback function which accepts one argument of type API.Radar.Results</p></li>
+<li><p><strong>wait</strong> (<em>boolean</em>) – If False, the request for results takes place in a new thread.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>NoChirpStartedException</strong> – Raised if the API returns a 403 indicating the radar cannot start the burst and no data is available, i.e. the radar state is idle.</p></li>
+<li><p><strong>RadarBusyException</strong> – Raised if the burst could not be started because the radar is already performing a burst.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -104,6 +123,24 @@ radar from starting the burst.</p>
 <dt class="sig sig-object py" id="apreshttp.Radar.results">
 <span class="sig-name descname"><span class="pre">results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">callback</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Radar.results" title="Permalink to this definition">¶</a></dt>
 <dd><p>Wait for results to be returned by the radar</p>
+<p>Calls the function <cite>callback</cite> when the api/radar/results page
+indicates that the chirp has finished.</p>
+<p>If the <cite>ResultsTimeoutException</cite> is raised, it is a good
+indication that the radar should be reset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>callback</strong> (<em>callable</em>) – callback function which accepts one argument of type API.Radar.Results</p></li>
+<li><p><strong>wait</strong> (<em>boolean</em>) – If False, the request for results takes place in a new thread.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>NoChirpStartedException</strong> – If the radar state is idle, no data is returned.</p></li>
+<li><p><strong>ResultsTimeoutException</strong> – Raised if the timeout period is exceeded and no results are returned within this period.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -143,6 +180,12 @@ example code:</p>
 <li><p><strong>wait</strong> (<em>boolean</em>) – If callback is provided, should the function halt execution or wait in a seperate thread</p></li>
 </ul>
 </dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>NoChirpStartedException</strong> – Raised if the API returns a 403 indicating the radar cannot start the burst and no data is available, i.e. the radar state is idle.</p></li>
+<li><p><strong>RadarBusyException</strong> – Raised if the burst could not be started because the radar is already performing a burst.</p></li>
+</ul>
+</dd>
 </dl>
 </dd></dl>
 
@@ -153,7 +196,7 @@ example code:</p>
 <h2><cite>Radar.Config</cite> class<a class="headerlink" href="#radar-config-class" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="apreshttp.Radar.Config">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">apreshttp.Radar.</span></span><span class="sig-name descname"><span class="pre">Config</span></span><a class="headerlink" href="#apreshttp.Radar.Config" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">apreshttp.Radar.</span></span><span class="sig-name descname"><span class="pre">Config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api_obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Radar.Config" title="Permalink to this definition">¶</a></dt>
 <dd><p>Retrieve and modify radar burst configuration</p>
 <p>The Radar.Config class can be updated from the API using the <a class="reference internal" href="#apreshttp.Radar.Config.get" title="apreshttp.Radar.Config.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> method.</p>
 <p>If it is desired to change values, such as individual

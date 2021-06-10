@@ -1,3 +1,4 @@
+from apreshttp import InvalidAPIKeyException
 from .context import apreshttp
 
 import os
@@ -128,14 +129,12 @@ def test_radar_trial_burst_callback():
 
     # tcallback.plot()
 
-
 class TestCallback:
 
     def __init__(self):
         self.response = None
 
     def setResponse(self, resp):
-        print("Finished callback")
         self.response = resp
 
     def plot(self):
@@ -144,3 +143,48 @@ class TestCallback:
             axs[0].bar(range(len(self.response.histogram[at])), self.response.histogram[at],  alpha = 0.5)
             axs[1].plot(self.response.chirp[at])
         plt.show()
+
+def test_radar_burst():
+
+    # Create an API instance
+    api = apreshttp.API(API_ROOT)
+
+    api.setKey(API_KEY)
+    
+    api.radar.config.set(nAtts = 1, nBursts = 5, rfAttnSet=10, afGainSet=6);
+
+    api.setKey("INVALID KEY")
+
+    # Test burst doesn't go ahead
+    with pytest.raises(apreshttp.InvalidAPIKeyException):
+        api.radar.burst()
+
+    api.setKey(API_KEY)
+
+    # Perform a burst using an unknown filename
+    api.radar.burst()
+    
+    # Create callback object
+    cb = TestCallback()
+
+    # Get results
+    api.radar.results(cb.setResponse, wait=True)
+
+    # Validate filename
+    assert isinstance(cb.response.filename, str)
+    print(cb.response.filename)
+
+    # Create variable for filename
+    filename = datetime.datetime.now().strftime("%Y%m%d_%H-%M-%S") + ".dat"
+
+    api.radar.burst(filename)
+
+    api.radar.results(cb.setResponse, wait=True)
+
+    # Check that the filenames match
+    assert cb.response.filename == "Survey/"+filename
+
+    # Try again - should get an error
+    with pytest.raises(apreshttp.RadarBusyException):
+        api.radar.burst(filename)
+

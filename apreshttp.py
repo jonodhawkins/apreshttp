@@ -1,13 +1,14 @@
 # Python wrapper for HTTP API to Control the ApRES Radar
 import datetime
-import os
+import http
 import json
+import math
 import os
-import random
 import re
 import requests
 import time
 import threading
+from numpy import linspace
 
 class API:
     """
@@ -667,8 +668,8 @@ class Radar(APIChild):
         :type param: callable
         :param wait: If callback is provided, should the function halt execution or wait in a seperate thread
         :type wait: boolean
-        :type :raises BurstNotStartedException: Raised if the API returns a 403 indicating the radar cannot start the burst.  Might happen if the burst is already started, for example.
-
+        :raises NoChirpStartedException: Raised if the API returns a 403 indicating the radar cannot start the burst and no data is available, i.e. the radar state is idle.
+        :raises RadarBusyException:  Raised if the burst could not be started because the radar is already performing a burst.
         """
 
         if callback != None and not callable(callback):
@@ -701,6 +702,21 @@ class Radar(APIChild):
     def results(self, callback, wait = True):
         """
         Wait for results to be returned by the radar
+
+        Calls the function `callback` when the api/radar/results page
+        indicates that the chirp has finished. 
+
+        If the `ResultsTimeoutException` is raised, it is a good
+        indication that the radar should be reset.
+
+        :param callback: callback function which accepts one argument of type API.Radar.Results
+        :type callback: callable
+
+        :param wait: If False, the request for results takes place in a new thread.
+        :type wait: boolean
+
+        :raises NoChirpStartedException: If the radar state is idle, no data is returned.
+        :raises ResultsTimeoutException: Raised if the timeout period is exceeded and no results are returned within this period.
         """
 
         if not callable(callback):
@@ -760,7 +776,7 @@ class Radar(APIChild):
 
         raise ResultsTimeoutException
 
-    def burst(self):
+    def burst(self, filename = None, callback = None, wait = True):
         """
         Perform a measurement radar burst using the current config
 
@@ -774,14 +790,31 @@ class Radar(APIChild):
         If the status code is 403 then something is preventing the
         radar from starting the burst.
 
-        :raises BurstNotStartedException: Raised if the API returns a 403 indicating the radar cannot start the burst.  Might happen if the burst is already started, for example.
+        :param filename: filename to be used when saving the burst to an SD card.
+        :type filename: str
+
+        :param callback: callback function which accepts one argument of type API.Radar.Results
+        :type callback: callable
+
+        :param wait: If False, the request for results takes place in a new thread.
+        :type wait: boolean
+
+        :raises NoChirpStartedException: Raised if the API returns a 403 indicating the radar cannot start the burst and no data is available, i.e. the radar state is idle.
+        :raises RadarBusyException:  Raised if the burst could not be started because the radar is already performing a burst.
         """
 
         # Update config locally
         self.config.get()
 
+        if filename != None and not isinstance(filename, str):
+            raise ValueError("filename parameter should be of type 'str'.")
+
+        data_obj = {
+            "filename" : filename
+        }
+
         # Make a POST request to trial burst
-        response = self.postRequest("radar/burst")
+        response = self.postRequest("radar/burst", data_obj, allow_redirects=False)
 
         # Check whether the burst started (any other status codes )
         if response.status_code != self.VALID_BURST_STATUS_CODE:
@@ -793,13 +826,40 @@ class Radar(APIChild):
             else:
                 raise RadarBusyException
 
+        # If callback is available then use that
+        if callback != None:
+            return self.results(callback, wait)
+
     class Results:
         """
-        Container class for trial-burst results
+        Container class for burst and trial results
+
+        The `type` parameter can be used to determine whether the
+        results arise from trial burst or a full burst, and the
+        parameters will depend on this.
         """
         def __init__(self, response):
 
             response_json = response.json()
+
+            if not "type" in response_json:
+                raise BadResponseException("No key 'type' found in results.")
+
+            #: indicates whether the results are a trial or full burst
+            self.type = response_json["type"]
+
+            if self.type == "trial":
+
+                self.__loadTrialParameters(response_json)
+
+            elif self.type == "burst":
+
+                self.__loadBurstParameters(response_json)
+
+            else:
+                raise BadResponseException("Invalid type '{type:s}'".format(type=self.type))
+
+        def __loadTrialParameters(self, response_json):
 
             if not "nAttenuators" in response_json:
                 raise BadResponseException("No key 'nAttenuators' found in results.")
@@ -807,32 +867,28 @@ class Radar(APIChild):
             if not "nAverages" in response_json:
                 raise BadResponseException("No key 'nAverages' found in results.")
 
+            #: Number of attenuator settings in the response
             self.nAttenuators = int(response_json["nAttenuators"])
+            #: Number of averages used to compute the response
             self.nAverages = int(response_json["nAverages"])
 
+            #: histogram counts for each attenuator setting (list of lists)
             self.histogram = [];
+            self.histogramVoltage = linspace(0, 2.5, 50)
+            #: chirp data for each attenuator setting (list of lists)
             self.chirp = [];
-
-            print(list(response_json))
-
-            with open("resp.log", 'a') as fh:
-                fh.write(response.text)
-                fh.close()
 
             # Iterate over number of attenuators
             for attnIdx in range(self.nAttenuators):
                 self.histogram.append(response_json["histogram" + str(attnIdx+1)])
                 self.chirp.append([v / 65536 * 2.5 for v in response_json["chirp" + str(attnIdx+1)]])
 
-            # # Create empty list for results
-            # self.range = []
-            #
-            # # Iterate over number of attenuators
-            # for attnIdx in range(self.nAttenuators):
-            #     # TODO: Add code to parse results
-            #     pass
+        def __loadBurstParameters(self, response_json):
 
+            if not "filename" in response_json:
+                raise BadResponseException("No filename in response.")
 
+            self.filename = response_json["filename"]
 
     class Config(APIChild):
         """
@@ -1168,6 +1224,168 @@ class Data(APIChild):
     def __init__(self, api_obj):
         super().__init__(api_obj);
 
+    def dir(self, path="", startIdx=0, listSize=16):
+        """
+        Get a directory listing or download a file
+        """
+
+        if not isinstance(path, str):
+            raise ValueError("path should be of type 'str'")
+
+        data_obj = {
+            "path" : path,
+            "index" : startIdx,
+            "list" : listSize
+        }
+
+        response = self.getRequest("data", data_obj)
+
+        if response.status_code == 404:
+            
+            raise NotFoundException(path)
+
+        elif response.status_code == 403:
+
+            raise NotADirectoryError(path)
+
+        elif response.status_code != 200:
+
+            raise InternalRadarErrorException(
+                "Radar returned unexpected status code " + 
+                str(response.status_code)#
+            )
+
+        # Now we can parse the response
+        response_json = response.json()
+
+        return self.DirectoryListing(response_json)
+        
+    def download(self, path, dst_path=None):
+        """
+        Download a file to the working dir or the destination path
+
+        :param dst_path: destination path to download file to
+        :type dst_path: str
+        """
+        
+        filename = os.path.basename(path)
+
+        if dst_path != None:
+            if os.path.isdir(dst_path):
+                filename = os.path.join(dst_path, filename)
+            else:
+                filename = dst_path
+
+        if os.path.exists(filename):
+            raise FileExistsError(filename)
+
+        data_obj = {
+            "path" : path
+        }
+
+        # Get response
+        response = self.getRequest("data/download", data_obj)
+
+        # Write file
+        with open(filename, 'w') as fh:
+            fh.write(response.text)
+        
+
+    class DirectoryListing:
+        """
+        Represents files stored on the ApRES SD card
+        """
+
+        def __init__(self, resp_json):
+
+            #: List of file objects
+            self.files = []
+            #: List of directory objects
+            self.directories = []
+            #: Root path of directory
+            self.path = None
+            #: Number of files in directory
+            self.numObjectsInDir = 0
+            #: Number of files in listing
+            self.numObjectsInList = 0
+
+            self.load(resp_json)
+            
+        def load(self, resp_json):
+
+            if not "path" in resp_json:
+                raise BadResponseException("No path key in dir listing request.")
+
+            self.path = resp_json["path"]
+
+            if not "files" in resp_json:
+                raise BadResponseException("No files key in dir listing request.")
+            # Store values
+            self.numObjectsInDir = resp_json["length"]
+            self.index = resp_json["index"]
+            self.pageSize = resp_json["list"]
+
+            # Calculate page (and max page)
+            self.pages = math.ceil(self.numObjectsInDir / self.pageSize)
+            self.page = math.floor(self.index / self.pageSize)
+
+            self.numObjectsInList = resp_json["fileCount"]
+
+            for file in resp_json["files"]:
+
+                if file["dir"]:
+                    self.directories.append(Data.FileObject(file))
+                else:
+                    self.files.append(Data.FileObject(file))
+
+    class FileObject:
+        
+        def __init__(self, 
+            resp_json
+        ):
+            # Check whether a response object was passed
+            self.__initFromJSON(resp_json)
+
+
+        def __initFromJSON(self, resp_json):
+            datetimeobj = datetime.datetime.strptime(
+                resp_json["timestamp"],
+                "%Y-%m-%d %H:%M:%S"
+            )
+            if not isinstance(resp_json["name"], str): 
+                raise ValueError("name should be an instance of type 'str'")
+            self.name = resp_json["name"]
+
+            if not isinstance(resp_json["path"], str): 
+                raise ValueError("path should be an instance of type 'str'")
+            self.path = resp_json["path"]
+
+            if not (isinstance(resp_json["size"], int) or isinstance(resp_json["size"], float)):
+                raise ValueError("size should be an instance of type 'float' or 'int'")
+            self.size = resp_json["size"]
+
+            if not isinstance(datetimeobj, datetime.datetime):
+                raise ValueError("date_modified should be a datetime object.")
+            self.date = datetimeobj
+
+
+        def download(self, api, dst_path=None):
+            """
+            Download the file to the working dir or the destination path
+            
+            :param api: instance of the apreshttp API
+            :type api: apreshttp.API
+            
+            :param dst_path: destination path to download file to
+            :type dst_path: str
+            """
+
+            api.data.download(self.path, dst_path)
+
+
+
+    
+
 ################################################################################
 # Exceptions
 
@@ -1193,9 +1411,6 @@ class BadResponseException(Exception):
     pass
 
 class NoFileUploadedError(Exception):
-    pass
-
-class BurstNotStartedException(Exception):
     pass
 
 class NoChirpStartedException(Exception):
