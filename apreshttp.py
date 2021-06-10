@@ -3,6 +3,7 @@ import datetime
 import os
 import json
 import os
+import random
 import re
 import requests
 import time
@@ -53,19 +54,21 @@ class API:
         self.wait = 1 #: wait time between consecutive HTTP requests
 
         # Whether to output debug commands
-        self.debugEnable = False
+        self.debugEnable = True
+        self.requestCount = 0;
 
         self.apiKey = "INVALID"
 
     def debug(self, *args, **kwargs):
+
         """
         Prints to the default system output buffer, if debug enabled
 
         Prints to the default system output buffer, as used by the
         system `print` function.
 
-        :param \*args: unpack unnamed arguments into print
-        :param \*\*kwargs: unpack named keywork arguments into print
+        :param args: unpack unnamed arguments into print
+        :param kwargs: unpack named keywork arguments into print
         """
 
         if self.debugEnable:
@@ -147,7 +150,7 @@ class APIChild:
 
         self.api = api_obj
 
-    def postRequest(self, url, data_obj = None, files_obj = None):
+    def postRequest(self, url, data_obj = None, files_obj = None, *args, **kwargs):
         """
         Perform a POST request to the URL, passing an API key and data
 
@@ -188,6 +191,11 @@ class APIChild:
         elif "apikey" not in data_obj.keys():
             data_obj["apikey"] = self.api.apiKey
 
+        self.api.requestCount = self.api.requestCount + 1;
+
+        if self.api.debugEnable:
+            data_obj["requestid"] = self.api.requestCount
+
         self.api.debug("POST request to [{url:s}] with data:".format(url=completeUrl))
         self.api.debug(data_obj)
 
@@ -196,7 +204,9 @@ class APIChild:
             response = requests.post(
                 completeUrl,
                 data = data_obj,
-                timeout = self.api.timeout
+                timeout = self.api.timeout,
+                *args,
+                **kwargs
             )
         else:
         # If files is set then add that
@@ -204,7 +214,9 @@ class APIChild:
                 completeUrl,
                 data = data_obj,
                 files = files_obj,
-                timeout = self.api.timeout
+                timeout = self.api.timeout,
+                *args,
+                **kwargs
             )
 
         self.api.debug("Validating...")
@@ -216,7 +228,7 @@ class APIChild:
         # Return the response for the function to do something with
         return response
 
-    def getRequest(self, url, data_obj = None):
+    def getRequest(self, url, data_obj = None, *args, **kwargs):
         """
         Perform a GET request to the URL, passing an API key and data
 
@@ -246,15 +258,22 @@ class APIChild:
         if data_obj == None:
             data_obj = dict()
 
+        self.api.requestCount += 1;
+
+        if self.api.debugEnable:
+            data_obj["requestid"] = self.api.requestCount
+
         self.api.debug("GET request to [{url:s}] with data:".format(url=completeUrl))
         self.api.debug(data_obj)
 
         # Create request object
         response = requests.get(
             completeUrl,
-            data = data_obj,
+            params = data_obj,
             timeout = self.api.timeout
         )
+
+        self.api.debug(response.url)
 
         self.api.debug("Validating...")
         self.validateResponse(response)
@@ -601,6 +620,8 @@ class Radar(APIChild):
     a radar measurement (burst).
     """
 
+    VALID_BURST_STATUS_CODE = 303;
+
     def __init__(self, api_obj):
         super().__init__(api_obj);
         # Create child of type Config
@@ -656,21 +677,26 @@ class Radar(APIChild):
         # Update config locally
         self.config.get()
 
+        try:
         # Make a POST request to trial burst
-        response = self.postRequest("radar/trial-burst")
+            response = self.postRequest("radar/trial-burst", allow_redirects=False)
+        except (requests.exceptions.ConnectionError) as e:
+                raise RadarBusyException
 
         # Check whether the burst started (any other status codes )
-        if response.status_code != 303:
+        self.api.debug("Received {rsp:d} response".format(rsp=response.status_code))
+
+        if response.status_code != self.VALID_BURST_STATUS_CODE:
 
             # Get response
             response_json = response.json()
             if "errorMessage" in response_json:
-                raise BurstNotStartedException(response_json["errorMessage"])
+                raise RadarBusyException(response_json["errorMessage"])
             else:
-                raise BurstNotStartedException
+                raise RadarBusyException
 
         if callback != None:
-            self.results(callback, wait)
+            return self.results(callback, wait)
 
     def results(self, callback, wait = True):
         """
@@ -683,10 +709,13 @@ class Radar(APIChild):
         # If waiting, run in the same thread
         if wait:
             self.__getResults(callback)
+            return None
         # Otherwise create a new thread and start it
         else:
-            resultsThread = threading.start(self.__getResults, args=(callback))
+            self.api.debug(self.__getResults)
+            resultsThread = threading.Thread(target=self.__getResults, args=(callback,))
             resultsThread.start()
+            return resultsThread
 
 
     def __getResults(self, callback):
@@ -704,7 +733,7 @@ class Radar(APIChild):
         timeoutSeconds = self.config.nSubBursts * \
                          self.config.nAttenuators * 2 + self.api.timeout
 
-        self.api.debug("Getting results [Timeout = {timeout:f]".format(
+        self.api.debug("Getting results [Timeout = {timeout:f}".format(
             timeout=timeoutSeconds
         ))
 
@@ -718,15 +747,16 @@ class Radar(APIChild):
             response_json = response.json()
 
             # Check if a chirp was requested
-            if response_json["status"] == "sleeping":
+            if response_json["status"] == "idle":
                 # No chirp was started so break
                 raise NoChirpStartedException
 
-            elif response_json["status"] == "chirping":
-                pass
-
             elif response_json["status"] == "finished":
                 callback(self.Results(response))
+                return
+
+            # wait until next timeout
+            time.sleep(2)
 
         raise ResultsTimeoutException
 
@@ -754,14 +784,14 @@ class Radar(APIChild):
         response = self.postRequest("radar/burst")
 
         # Check whether the burst started (any other status codes )
-        if response.status_code != 303:
+        if response.status_code != self.VALID_BURST_STATUS_CODE:
 
             # Get response
             response_json = response.json()
             if "errorMessage" in response_json:
-                raise BurstNotStartedException(response_json["errorMessage"])
+                raise RadarBusyException(response_json["errorMessage"])
             else:
-                raise BurstNotStartedException
+                raise RadarBusyException
 
     class Results:
         """
@@ -778,16 +808,29 @@ class Radar(APIChild):
                 raise BadResponseException("No key 'nAverages' found in results.")
 
             self.nAttenuators = int(response_json["nAttenuators"])
-            self.nAverages = int(response_json["nAverage"])
+            self.nAverages = int(response_json["nAverages"])
 
-            # Create empty list for results
-            self.range = []
+            self.histogram = [];
+            self.chirp = [];
 
+            print(list(response_json))
+
+            with open("resp.log", 'a') as fh:
+                fh.write(response.text)
+                fh.close()
 
             # Iterate over number of attenuators
             for attnIdx in range(self.nAttenuators):
-                # TODO: Add code to parse results
-                pass
+                self.histogram.append(response_json["histogram" + str(attnIdx+1)])
+                self.chirp.append([v / 65536 * 2.5 for v in response_json["chirp" + str(attnIdx+1)]])
+
+            # # Create empty list for results
+            # self.range = []
+            #
+            # # Iterate over number of attenuators
+            # for attnIdx in range(self.nAttenuators):
+            #     # TODO: Add code to parse results
+            #     pass
 
 
 
@@ -811,7 +854,8 @@ class Radar(APIChild):
         a :py:meth:`get` request is made.
         """
 
-        def __init__(self):
+        def __init__(self, api_obj):
+            super().__init__(api_obj);
             #: Number of attenuator settings (int)
             self.nAttenuators = None
             #: Number of sub-bursts per burst (int)
@@ -833,13 +877,17 @@ class Radar(APIChild):
             """
 
             # Get response
-            response = self.getRequest("radar/config")
+            if self.api.debugEnable:
+                response = self.getRequest("radar/config", data={"debug":1})
+            else:
+                response = self.getRequest("radar/config")
             #
             if response.status_code != 200:
                 raise BadResponseException(
                 "Unexpected status code: {stat:d}".format(stat=response.status_code))
             else:
-                readResponse(response)
+                self.readResponse(response)
+                return self
 
         def readResponse(self, response):
             """
@@ -994,14 +1042,14 @@ class Radar(APIChild):
 
             valid_rf = None
             if rfAttnSet != None:
-                valid_rf = parseRFAttnAFGain("rfAttn", rfAttnSet, nAtts)
+                valid_rf = self.parseRFAttnAFGain("rfAttn", rfAttnSet, nAtts)
                 if len(valid_rf) > 0:
                     # Merge valid with data_obj
                     data_obj = {**data_obj, **valid_rf}
 
             valid_af = None
             if afGainSet != None:
-                valid_af = parseRFAttnAFGain("afGain", afGainSet, nAtts)
+                valid_af = self.parseRFAttnAFGain("afGain", afGainSet, nAtts)
                 if len(valid_af) > 0:
                     # Merge valid with data_obj
                     data_obj = {**data_obj, **valid_af}
@@ -1016,7 +1064,7 @@ class Radar(APIChild):
 
             elif response.status_code == 200:
                 # Update object from response
-                readResponse(response)
+                self.readResponse(response)
                 # Check whether new values match updated values
                 if nAtts != None and nAtts != self.nAttenuators:
                     raise DidNotUpdateException("nAttenuators did not update.")
@@ -1030,7 +1078,7 @@ class Radar(APIChild):
                         # Take last character as index
                         idx = int(key[-1]) - 1
                         # Check values match
-                        self.api.debug("RF Assigned: {srv:d} vs. Retrieved: {mem:}".format(srv = value, mem = self.rfAttn[idx]))
+                        self.api.debug("RF Assigned: {srv:f} vs. Retrieved: {mem:f}".format(srv = value, mem = self.rfAttn[idx]))
                         if value != self.rfAttn[idx]:
                             raise DidNotUpdateException(key + " did not update.")
 
@@ -1039,7 +1087,7 @@ class Radar(APIChild):
                     for key, value in valid_af.items():
                         idx = int(key[-1]) - 1
                         # Check values match
-                        self.api.debug("AF Assigned: {srv:d} vs. Retrieved: {mem:}".format(srv = value, mem = self.afGain[idx]))
+                        self.api.debug("AF Assigned: {srv:f} vs. Retrieved: {mem:f}".format(srv = value, mem = self.afGain[idx]))
                         if value != self.afGain[idx]:
                             raise DidNotUpdateException(key + " did not update.")
 
@@ -1092,13 +1140,13 @@ class Radar(APIChild):
                 # First of all, get the correct number of attenuators
                 # and store in nAtts
                 if nAtts == None:
-                    nAtts = self.nAtts
+                    nAtts = self.nAttenuators
 
                 # Create regexp for key validation
                 # (this only works if nAtts <= 9, currently 4)
                 regexp = type + "([1-" + str(nAtts) + "])"
 
-                for key, val in args.items():
+                for key, val in arg.items():
                     # Find type in the key at index 0
                     match = re.search(regexp, key)
                      # check that it occurs at the start
@@ -1129,7 +1177,7 @@ class InvalidAPIKeyException(Exception):
 class InternalRadarErrorException(Exception):
     pass
 
-class RadarBusyExceptio(Exception):
+class RadarBusyException(Exception):
     pass
 
 class NotFoundException(Exception):
@@ -1154,4 +1202,7 @@ class NoChirpStartedException(Exception):
     pass
 
 class ResultsTimeoutException(Exception):
+    pass
+
+class DidNotUpdateException(Exception):
     pass

@@ -2,8 +2,10 @@ from .context import apreshttp
 
 import os
 import datetime
+import matplotlib.pyplot as plt
 import pytest
 import random
+import time
 
 API_ROOT = "http://radar.localnet"
 API_KEY = "18052021"
@@ -61,10 +63,10 @@ def test_radar_config_set():
     )
 
     for i in range(len(config.afGain)):
-        assert config.afGain[i] == list(afValues)[i]
+        assert config.afGain[i] == list(afValues.values())[i]
 
     for i in range(len(config.rfAttn)):
-        assert config.rfAttn[i] == list(rfValues)[i]
+        assert config.rfAttn[i] == list(rfValues.values())[i]
 
     with pytest.raises(KeyError):
         # Try to set 4th attenuator value when only 3 are enabled
@@ -90,3 +92,55 @@ def test_radar_config_set():
         # nAtts should be 3, so these should fail
         config = api.radar.config.set(rfAttnSet = 9)
         config = api.radar.config.set(afGainSet = -4)
+
+def test_radar_trial_burst():
+
+    # Create an API instance
+    api = apreshttp.API(API_ROOT)
+    api.setKey(API_KEY)
+
+    # Try to perform a trial burst
+    api.radar.trialBurst()
+    print("Done first trial")
+    with pytest.raises(apreshttp.RadarBusyException):
+        print("Try error trial")
+        api.radar.trialBurst()
+
+    # Wait for trial burst to finish
+    time.sleep(5)
+
+def test_radar_trial_burst_callback():
+
+    # Create an API instance
+    api = apreshttp.API(API_ROOT)
+    api.setKey(API_KEY)
+
+    config = api.radar.config.set(nAtts=3, rfAttnSet={'rfAttn1':10,'rfAttn2':20,'rfAttn3':30}, afGainSet=[6, 6, 6])
+
+    print(config.nAttenuators)
+    print(config.rfAttn[0])
+    print(config.rfAttn[1])
+    print(config.rfAttn[2])
+
+    tcallback = TestCallback();
+
+    api.radar.trialBurst(tcallback.setResponse, wait = True)
+
+    # tcallback.plot()
+
+
+class TestCallback:
+
+    def __init__(self):
+        self.response = None
+
+    def setResponse(self, resp):
+        print("Finished callback")
+        self.response = resp
+
+    def plot(self):
+        fig, axs = plt.subplots(1, 2)
+        for at in range(self.response.nAttenuators):
+            axs[0].bar(range(len(self.response.histogram[at])), self.response.histogram[at],  alpha = 0.5)
+            axs[1].plot(self.response.chirp[at])
+        plt.show()
