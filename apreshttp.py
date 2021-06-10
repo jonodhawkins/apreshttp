@@ -1226,7 +1226,28 @@ class Data(APIChild):
 
     def dir(self, path="", startIdx=0, listSize=16):
         """
-        Get a directory listing or download a file
+        Get a directory listing from the path specified
+
+        Returns a :py:class:`apreshttp.Data.DirectoryListing`
+        object representing the files and directories in the
+        specified path.
+
+        If there are more than `listSize=16` (default) files
+        in the directory, the returned list will be truncated
+        and the total number of objects in the directory stored
+        in `numObjectsInDir`.
+
+        To request the next 'page' of objects in the directory.
+        make another call to `dir` with `startIdx=N*listSize`,
+        where N is the desired 'page number'.
+
+        :raises ValueError: if path is not a string object
+        :raises NotFoundException: if the path is not found on the ApRES file system
+        :raises NotADirectoryError: if the path does not point to a directory
+        :raises InternalRadarErrorException: if an internal radar error has occured.
+
+        :return: object containing descriptions of files and subdirectories. 
+        :rtype: :py:class:`apreshttp.Data.DirectoryListing`
         """
 
         if not isinstance(path, str):
@@ -1264,8 +1285,26 @@ class Data(APIChild):
         """
         Download a file to the working dir or the destination path
 
+        If the file at `path` exists on the ApRES filesystem, 
+        it will be downloaded to either the current working directory
+        (if `dst_path` is `None`).
+
+        Alternatively, providing a `dst_path` value that refers to
+        a directory will download the file to that directory, using 
+        its name on the ApRES filesystem.
+
+        Providing a `dst_path` value that refers to a file will
+        download the file to that path.
+
+        **NOTE**: If the destination filepath already exists, a
+        `FileExistsException` will be thrown.
+
+        :param path: path on the ApRES filesystem of the file to download
+        :type path: str
         :param dst_path: destination path to download file to
         :type dst_path: str
+
+        :raises FileExistsException: if the file already exists at `dst_path`
         """
         
         filename = os.path.basename(path)
@@ -1297,10 +1336,13 @@ class Data(APIChild):
         """
 
         def __init__(self, resp_json):
+            """
+            Create a new DirectoryListing from parsed JSON data
+            """
 
-            #: List of file objects
+            #: List of file objects (:py:class:`apreshttp.Data.FileObject`)
             self.files = []
-            #: List of directory objects
+            #: List of directory objects (:py:class:`apreshttp.Data.FileObject`)
             self.directories = []
             #: Root path of directory
             self.path = None
@@ -1339,6 +1381,10 @@ class Data(APIChild):
                     self.files.append(Data.FileObject(file))
 
     class FileObject:
+        """
+        Class to represent files or directories on the ApRES
+        file system
+        """
         
         def __init__(self, 
             resp_json
@@ -1372,6 +1418,8 @@ class Data(APIChild):
         def download(self, api, dst_path=None):
             """
             Download the file to the working dir or the destination path
+
+            See the documentation for :py:meth:`apreshttp.Data.download`
             
             :param api: instance of the apreshttp API
             :type api: apreshttp.API

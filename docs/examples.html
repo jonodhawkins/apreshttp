@@ -59,18 +59,6 @@
   <span class="o">...</span> <span class="n">do</span> <span class="n">something</span> <span class="k">with</span> <span class="n">the</span> <span class="n">config</span> <span class="n">file</span>
 </pre></div>
 </div>
-<p>To check the ApRES status, using the previously created instance of the API</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Try to get the status</span>
-<span class="k">try</span><span class="p">:</span>
-  <span class="n">status</span> <span class="o">=</span> <span class="n">api_instance</span><span class="o">.</span><span class="n">system</span><span class="o">.</span><span class="n">housekeeping</span><span class="o">.</span><span class="n">status</span><span class="p">()</span>
-<span class="k">except</span><span class="p">:</span>
-  <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Something went wrong!&quot;</span><span class="p">)</span>
-
-<span class="c1"># Check that battery voltage</span>
-<span class="k">if</span> <span class="n">status</span><span class="o">.</span><span class="n">batteryVoltage</span> <span class="o">&gt;</span> <span class="mf">5.5</span><span class="p">:</span>
-  <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Battery okay.&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
 </section>
 
 

@@ -47,6 +47,168 @@
             
   <section id="data-class-documentation">
 <h1><cite>Data</cite> class documentation<a class="headerlink" href="#data-class-documentation" title="Permalink to this headline">¶</a></h1>
+<section id="data-class">
+<h2><cite>Data</cite> class<a class="headerlink" href="#data-class" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="apreshttp.Data">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">apreshttp.</span></span><span class="sig-name descname"><span class="pre">Data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api_obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Data" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="apreshttp.Data.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api_obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Data.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assign instance of the <a class="reference internal" href="api.html#apreshttp.API" title="apreshttp.API"><code class="xref py py-class docutils literal notranslate"><span class="pre">API</span></code></a> class</p>
+<p>APIChild should inherently be a child of an <a class="reference internal" href="api.html#apreshttp.API" title="apreshttp.API"><code class="xref py py-class docutils literal notranslate"><span class="pre">API</span></code></a> object
+hence the constructor requires an instance of <a class="reference internal" href="api.html#apreshttp.API" title="apreshttp.API"><code class="xref py py-class docutils literal notranslate"><span class="pre">API</span></code></a> to
+meet this conditions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>api_obj</strong> (<a class="reference internal" href="api.html#apreshttp.API" title="apreshttp.API"><em>apreshttp.API</em></a>) – instance of <a class="reference internal" href="api.html#apreshttp.API" title="apreshttp.API"><code class="xref py py-class docutils literal notranslate"><span class="pre">API</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apreshttp.Data.dir">
+<span class="sig-name descname"><span class="pre">dir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startIdx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">listSize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Data.dir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a directory listing from the path specified</p>
+<p>Returns a <a class="reference internal" href="#apreshttp.Data.DirectoryListing" title="apreshttp.Data.DirectoryListing"><code class="xref py py-class docutils literal notranslate"><span class="pre">apreshttp.Data.DirectoryListing</span></code></a>
+object representing the files and directories in the
+specified path.</p>
+<p>If there are more than <cite>listSize=16</cite> (default) files
+in the directory, the returned list will be truncated
+and the total number of objects in the directory stored
+in <cite>numObjectsInDir</cite>.</p>
+<p>To request the next ‘page’ of objects in the directory.
+make another call to <cite>dir</cite> with <cite>startIdx=N*listSize</cite>,
+where N is the desired ‘page number’.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ValueError</strong> – if path is not a string object</p></li>
+<li><p><strong>NotFoundException</strong> – if the path is not found on the ApRES file system</p></li>
+<li><p><strong>NotADirectoryError</strong> – if the path does not point to a directory</p></li>
+<li><p><strong>InternalRadarErrorException</strong> – if an internal radar error has occured.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>object containing descriptions of files and subdirectories.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#apreshttp.Data.DirectoryListing" title="apreshttp.Data.DirectoryListing"><code class="xref py py-class docutils literal notranslate"><span class="pre">apreshttp.Data.DirectoryListing</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apreshttp.Data.download">
+<span class="sig-name descname"><span class="pre">download</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dst_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Data.download" title="Permalink to this definition">¶</a></dt>
+<dd><p>Download a file to the working dir or the destination path</p>
+<p>If the file at <cite>path</cite> exists on the ApRES filesystem, 
+it will be downloaded to either the current working directory
+(if <cite>dst_path</cite> is <cite>None</cite>).</p>
+<p>Alternatively, providing a <cite>dst_path</cite> value that refers to
+a directory will download the file to that directory, using 
+its name on the ApRES filesystem.</p>
+<p>Providing a <cite>dst_path</cite> value that refers to a file will
+download the file to that path.</p>
+<p><strong>NOTE</strong>: If the destination filepath already exists, a
+<cite>FileExistsException</cite> will be thrown.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>str</em>) – path on the ApRES filesystem of the file to download</p></li>
+<li><p><strong>dst_path</strong> (<em>str</em>) – destination path to download file to</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>FileExistsException</strong> – if the file already exists at <cite>dst_path</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<section id="directorylisting-class">
+<h3><cite>DirectoryListing</cite> class<a class="headerlink" href="#directorylisting-class" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="apreshttp.Data.DirectoryListing">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">apreshttp.Data.</span></span><span class="sig-name descname"><span class="pre">DirectoryListing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resp_json</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Data.DirectoryListing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents files stored on the ApRES SD card</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="apreshttp.Data.DirectoryListing.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resp_json</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Data.DirectoryListing.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new DirectoryListing from parsed JSON data</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apreshttp.Data.DirectoryListing.directories">
+<span class="sig-name descname"><span class="pre">directories</span></span><a class="headerlink" href="#apreshttp.Data.DirectoryListing.directories" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of directory objects (<a class="reference internal" href="#apreshttp.Data.FileObject" title="apreshttp.Data.FileObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">apreshttp.Data.FileObject</span></code></a>)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apreshttp.Data.DirectoryListing.files">
+<span class="sig-name descname"><span class="pre">files</span></span><a class="headerlink" href="#apreshttp.Data.DirectoryListing.files" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of file objects (<a class="reference internal" href="#apreshttp.Data.FileObject" title="apreshttp.Data.FileObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">apreshttp.Data.FileObject</span></code></a>)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apreshttp.Data.DirectoryListing.load">
+<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resp_json</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Data.DirectoryListing.load" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apreshttp.Data.DirectoryListing.numObjectsInDir">
+<span class="sig-name descname"><span class="pre">numObjectsInDir</span></span><a class="headerlink" href="#apreshttp.Data.DirectoryListing.numObjectsInDir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of files in directory</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apreshttp.Data.DirectoryListing.numObjectsInList">
+<span class="sig-name descname"><span class="pre">numObjectsInList</span></span><a class="headerlink" href="#apreshttp.Data.DirectoryListing.numObjectsInList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of files in listing</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apreshttp.Data.DirectoryListing.path">
+<span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#apreshttp.Data.DirectoryListing.path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Root path of directory</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="fileobject-class">
+<h3><cite>FileObject</cite> class<a class="headerlink" href="#fileobject-class" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="apreshttp.Data.FileObject">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">apreshttp.Data.</span></span><span class="sig-name descname"><span class="pre">FileObject</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resp_json</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Data.FileObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to represent files or directories on the ApRES
+file system</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="apreshttp.Data.FileObject.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resp_json</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Data.FileObject.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apreshttp.Data.FileObject.download">
+<span class="sig-name descname"><span class="pre">download</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dst_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Data.FileObject.download" title="Permalink to this definition">¶</a></dt>
+<dd><p>Download the file to the working dir or the destination path</p>
+<p>See the documentation for <a class="reference internal" href="#apreshttp.Data.download" title="apreshttp.Data.download"><code class="xref py py-meth docutils literal notranslate"><span class="pre">apreshttp.Data.download()</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>api</strong> (<a class="reference internal" href="api.html#apreshttp.API" title="apreshttp.API"><em>apreshttp.API</em></a>) – instance of the apreshttp API</p></li>
+<li><p><strong>dst_path</strong> (<em>str</em>) – destination path to download file to</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
 </section>
 
 
@@ -56,6 +218,18 @@
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#"><cite>Data</cite> class documentation</a><ul>
+<li><a class="reference internal" href="#data-class"><cite>Data</cite> class</a><ul>
+<li><a class="reference internal" href="#directorylisting-class"><cite>DirectoryListing</cite> class</a></li>
+<li><a class="reference internal" href="#fileobject-class"><cite>FileObject</cite> class</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
   <h4>Previous topic</h4>
   <p class="topless"><a href="radar.html"
                         title="previous chapter"><cite>Radar</cite> class documentation</a></p>

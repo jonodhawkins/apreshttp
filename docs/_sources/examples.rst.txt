@@ -18,17 +18,3 @@ we can do the following
     if api_instance.system.housekeeping.config.download("my_config_file.ini"):
       # File downloaded successfully
       ... do something with the config file
-
-To check the ApRES status, using the previously created instance of the API
-
-.. code-block:: python
-
-  # Try to get the status
-  try:
-    status = api_instance.system.housekeeping.status()
-  except:
-    print("Something went wrong!")
-
-  # Check that battery voltage
-  if status.batteryVoltage > 5.5:
-    print("Battery okay.")
