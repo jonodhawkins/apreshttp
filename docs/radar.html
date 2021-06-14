@@ -121,10 +121,12 @@ radar from starting the burst.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="apreshttp.Radar.results">
-<span class="sig-name descname"><span class="pre">results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">callback</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Radar.results" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Radar.results" title="Permalink to this definition">¶</a></dt>
 <dd><p>Wait for results to be returned by the radar</p>
 <p>Calls the function <cite>callback</cite> when the api/radar/results page
-indicates that the chirp has finished.</p>
+indicates that the chirp has finished.   If callback is <cite>None</cite>
+then this works as a blocking function until the radar results
+are ready.</p>
 <p>If the <cite>ResultsTimeoutException</cite> is raised, it is a good
 indication that the radar should be reset.</p>
 <dl class="field-list simple">
@@ -290,6 +292,12 @@ a <a class="reference internal" href="#apreshttp.Radar.Config.get" title="apresh
 <li><p><strong>rfAttnSet</strong> (int, list, dict or <cite>None</cite>) – Set the values of the ApRES RF attenuator.  If using a dictionary, keys should be “rfAttn1”, “rfAttn2”, etc. and may be excluded if no update is desired.</p></li>
 <li><p><strong>afGainSet</strong> (int, list, dict or <cite>None</cite>) – Set the values of the ApRES AF gain.  If using a dictionary, keys should be “afGain1”, “afGain2”, etc. and may be exlcuded if no update is desired.</p></li>
 <li><p><strong>txAnt</strong> (<em>int</em><em> or </em><em>list</em>) – If using a MIMO board, set the active transmit antennas</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>BadResponseException</strong> – If an unexpected status code was returned</p></li>
+<li><p><strong>DidNotUpdateException</strong> – If the config settings were not updated</p></li>
 </ul>
 </dd>
 </dl>

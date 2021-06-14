@@ -43,7 +43,8 @@
             
   <section id="example-code">
 <h1>Example Code<a class="headerlink" href="#example-code" title="Permalink to this headline">¶</a></h1>
-<p>Class members are designed to have names to mimimc the REST API, so download the configuration file which would be performed by a GET request to</p>
+<p>Class members are designed to have names to mimimc the REST API, so download
+the configuration file which would be performed by a GET request to</p>
 <blockquote>
 <div><p><a class="reference external" href="http://radar.localnet/api/system/housekeeping/config">http://radar.localnet/api/system/housekeeping/config</a></p>
 </div></blockquote>
@@ -59,6 +60,47 @@
   <span class="o">...</span> <span class="n">do</span> <span class="n">something</span> <span class="k">with</span> <span class="n">the</span> <span class="n">config</span> <span class="n">file</span>
 </pre></div>
 </div>
+<section id="performing-a-radar-burst">
+<h2>Performing a Radar Burst<a class="headerlink" href="#performing-a-radar-burst" title="Permalink to this headline">¶</a></h2>
+<p>To perform a burst (or chirp) using the radar we need to set the chirp
+settings and choose a filename in advance.  Then, we can perform the
+burst, wait for the results to come through and store these locally.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">apreshttp</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="c1"># Create new API object</span>
+<span class="n">api_instance</span> <span class="o">=</span> <span class="n">API</span><span class="p">(</span><span class="s2">&quot;http://radar.localnet&quot;</span><span class="p">)</span>
+
+<span class="k">try</span><span class="p">:</span>
+  <span class="c1"># Update the radar chirp config</span>
+  <span class="n">api_instance</span><span class="o">.</span><span class="n">radar</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+    <span class="n">nAtts</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>              <span class="c1"># Use two attenuator settings</span>
+    <span class="n">rfAttnSet</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span> <span class="mi">20</span><span class="p">],</span>    <span class="c1"># Set the RF attenuations</span>
+    <span class="n">afGainSet</span> <span class="o">=</span> <span class="p">[</span><span class="mi">6</span> <span class="mi">6</span><span class="p">],</span>      <span class="c1"># Set the AF gains</span>
+    <span class="n">nBursts</span> <span class="o">=</span> <span class="mi">10</span>            <span class="c1"># Set the number of bursts per atten setting</span>
+  <span class="p">)</span>
+
+<span class="k">except</span> <span class="n">e</span><span class="p">:</span>
+  <span class="n">exit</span><span class="p">(</span><span class="s2">&quot;Could not set config.&quot;</span><span class="p">))</span>
+
+<span class="c1"># Choose a filename</span>
+<span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;my_latest_burst.dat&quot;</span>
+
+<span class="c1"># Perform burst</span>
+<span class="n">api_instance</span><span class="o">.</span><span class="n">radar</span><span class="o">.</span><span class="n">burst</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+<span class="c1"># Wait for results (blocking execution)</span>
+<span class="k">try</span><span class="p">:</span>
+  <span class="n">api_instance</span><span class="o">.</span><span class="n">radar</span><span class="o">.</span><span class="n">results</span><span class="p">(</span><span class="n">wait</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+<span class="k">except</span> <span class="n">e</span><span class="p">:</span>
+  <span class="n">exit</span><span class="p">(</span><span class="s2">&quot;Could not perform burst.&quot;</span><span class="p">)</span>
+
+<span class="c1"># Download the data (if the filename does not already exist locally)</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+  <span class="n">api_instance</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">download</span><span class="p">(</span><span class="s2">&quot;Survey/&quot;</span> <span class="o">+</span> <span class="n">filename</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
 </section>
 
 
@@ -68,6 +110,14 @@
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Example Code</a><ul>
+<li><a class="reference internal" href="#performing-a-radar-burst">Performing a Radar Burst</a></li>
+</ul>
+</li>
+</ul>
+
   <h4>Previous topic</h4>
   <p class="topless"><a href="routes.html"
                         title="previous chapter">ApRES HTTP API Routes</a></p>

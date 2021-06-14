@@ -699,12 +699,14 @@ class Radar(APIChild):
         if callback != None:
             return self.results(callback, wait)
 
-    def results(self, callback, wait = True):
+    def results(self, callback = None, wait = True):
         """
         Wait for results to be returned by the radar
 
         Calls the function `callback` when the api/radar/results page
-        indicates that the chirp has finished. 
+        indicates that the chirp has finished.   If callback is `None`
+        then this works as a blocking function until the radar results
+        are ready.
 
         If the `ResultsTimeoutException` is raised, it is a good
         indication that the radar should be reset.
@@ -768,7 +770,8 @@ class Radar(APIChild):
                 raise NoChirpStartedException
 
             elif response_json["status"] == "finished":
-                callback(self.Results(response))
+                if callback != None:
+                    callback(self.Results(response))
                 return
 
             # wait until next timeout
@@ -1007,8 +1010,10 @@ class Radar(APIChild):
             :param afGainSet: Set the values of the ApRES AF gain.  If using a dictionary, keys should be "afGain1", "afGain2", etc. and may be exlcuded if no update is desired.
             :type afGainSet: int, list, dict or `None`
             :param txAnt: If using a MIMO board, set the active transmit antennas
-
             :type txAnt: int or list
+
+            :raises BadResponseException: If an unexpected status code was returned
+            :raises DidNotUpdateException: If the config settings were not updated
 
             **NOTE**: Calling :py:meth:`set` will incur a call to
             :py:meth:`get` to retrieve the latest configuration.
