@@ -54,8 +54,11 @@ class API:
         self.timeout = 30 #: HTTP timeout in seconds
         self.wait = 1 #: wait time between consecutive HTTP requests
 
+        #: Interval between requests for results in seconds
+        self.resultsInterval = 2 
+
         # Whether to output debug commands
-        self.debugEnable = True
+        self.debugEnable = False
         self.requestCount = 0;
 
         self.apiKey = "INVALID"
@@ -504,6 +507,16 @@ class System(APIChild):
                 else:
                     raise BadResponseException("timeVAB should be a string containing YYYY-mm-DD HH-MM-SS timestamp.")
 
+            def __repr__(self):
+                str = "Status <0x{:x}>\n\n".format(id(self))
+                str += "\tVAB Time       : {}\n".format(self.timeVAB)
+                str += "\tGPS Time       : {}\n".format(self.timeGPS)
+                str += "\tLatitude       : {}\n".format(self.latitude)
+                str += "\tLongitude      : {}\n".format(self.longitude)
+                str += "\tBattery Voltage: {}\n".format(self.batteryVoltage)
+                return str
+            
+
         class Config(APIChild):
             """
             Config class facilitates up/download of the system config
@@ -629,7 +642,7 @@ class Radar(APIChild):
         #: Instance of a Radar.Config object which gets and sets the radar chirp config.
         self.config = self.Config(api_obj)
 
-    def trialBurst(self, callback = None, wait = True):
+    def trialBurst(self, callback = None, updateCallback = None, wait = True):
         """
         Perform a trial burst using the current configuration
 
@@ -666,6 +679,8 @@ class Radar(APIChild):
 
         :param callback: If provided, callback is executed when results are available.  The callback function should take a single argument of type requests.response
         :type param: callable
+        :param updateCallback: callback function executed on each results request (to provide progress updates)
+        :type updateCallback: callable
         :param wait: If callback is provided, should the function halt execution or wait in a seperate thread
         :type wait: boolean
         :raises NoChirpStartedException: Raised if the API returns a 403 indicating the radar cannot start the burst and no data is available, i.e. the radar state is idle.
@@ -696,10 +711,10 @@ class Radar(APIChild):
             else:
                 raise RadarBusyException
 
-        if callback != None:
-            return self.results(callback, wait)
+        if callback != None or updateCallback != None:
+            return self.results(callback, updateCallback, wait)
 
-    def results(self, callback = None, wait = True):
+    def results(self, callback = None, updateCallback = None, wait = True):        
         """
         Wait for results to be returned by the radar
 
@@ -714,29 +729,34 @@ class Radar(APIChild):
         :param callback: callback function which accepts one argument of type API.Radar.Results
         :type callback: callable
 
+        :param updateCallback: callback function executed on each results request (to provide progress updates)
+        :type updateCallback: callable
+
         :param wait: If False, the request for results takes place in a new thread.
         :type wait: boolean
+
+        :return: If wait = False, returns the thread instance executing the results code.  Otherwise, returns a results object if the results are obtained.
+        :rtype: :py:class:`threading.Thread`     
 
         :raises NoChirpStartedException: If the radar state is idle, no data is returned.
         :raises ResultsTimeoutException: Raised if the timeout period is exceeded and no results are returned within this period.
         """
 
-        if not callable(callback):
+        if callback != None and not callable(callback):
             raise TypeError("Argument 'callback' should be callable.")
 
         # If waiting, run in the same thread
         if wait:
-            self.__getResults(callback)
-            return None
+            return self.__getResults(callback, updateCallback) 
         # Otherwise create a new thread and start it
         else:
             self.api.debug(self.__getResults)
-            resultsThread = threading.Thread(target=self.__getResults, args=(callback,))
+            resultsThread = threading.Thread(target=self.__getResults, args=(callback, updateCallback))
             resultsThread.start()
             return resultsThread
 
 
-    def __getResults(self, callback):
+    def __getResults(self, callback, updateCallback = None):
         """
         Nothing to see here...
         """
@@ -748,7 +768,7 @@ class Radar(APIChild):
         init_time = datetime.datetime.now()
 
         # Calculate timeout (allow 2 seconds for each chirp)
-        timeoutSeconds = self.config.nSubBursts * \
+        timeoutSeconds = (self.config.nSubBursts + self.config.nAverages) * \
                          self.config.nAttenuators * 2 + self.api.timeout
 
         self.api.debug("Getting results [Timeout = {timeout:f}".format(
@@ -772,14 +792,17 @@ class Radar(APIChild):
             elif response_json["status"] == "finished":
                 if callback != None:
                     callback(self.Results(response))
-                return
+                return self.Results(response)
+
+            if updateCallback != None:
+                updateCallback(response)
 
             # wait until next timeout
-            time.sleep(2)
+            time.sleep(self.api.resultsInterval)
 
         raise ResultsTimeoutException
 
-    def burst(self, filename = None, callback = None, wait = True):
+    def burst(self, filename = None, callback = None, updateCallback = None, wait = True):
         """
         Perform a measurement radar burst using the current config
 
@@ -798,6 +821,9 @@ class Radar(APIChild):
 
         :param callback: callback function which accepts one argument of type API.Radar.Results
         :type callback: callable
+
+        :param updateCallback: callback function executed on each results request (to provide progress updates)
+        :type updateCallback: callable
 
         :param wait: If False, the request for results takes place in a new thread.
         :type wait: boolean
@@ -924,7 +950,16 @@ class Radar(APIChild):
             #: RF attenuator settings (list of float)
             self.afGain = []
             #: AF gain settings (list of float)
-            self.rfGain = []
+            self.rfAttn = []
+
+        def __repr__(self):
+            str = "Radar.Config <0x{:x}>\n\n".format(id(self))
+            str += "\tnAttenuators: {}\n".format(self.nAttenuators)
+            str += "\tnSubBursts  : {}\n".format(self.nSubBursts)
+            str += "\tnAverages   : {}\n".format(self.nAverages)
+            str += "\tafGain      : {}\n".format(self.afGain)
+            str += "\trfAttn      : {}\n".format(self.rfAttn)
+            return str
 
         def get(self):
             """
@@ -995,7 +1030,7 @@ class Radar(APIChild):
                 raise BadResponseException("Number of attenuator settings did not match nAttenuators in response.")
 
         def set(
-            self, nAtts=None, nBursts=None, rfAttnSet=None, afGainSet=None,
+            self, nAtts=None, nAverages = None, nBursts=None, rfAttnSet=None, afGainSet=None,
             txAnt=None, rxAnt=None
         ):
             """
@@ -1100,6 +1135,13 @@ class Radar(APIChild):
                     data_obj["nSubBursts"] = nBursts
                 else:
                     raise ValueError("nBursts should be numeric")
+
+            if nAverages != None:
+                # Check whether nBursts is a number
+                if isinstance(nAverages, int) or isinstance(nAverages, float):
+                    data_obj["nAverages"] = nAverages
+                else:
+                    raise ValueError("nAverages should be numeric")
 
             valid_rf = None
             if rfAttnSet != None:
@@ -1229,7 +1271,7 @@ class Data(APIChild):
     def __init__(self, api_obj):
         super().__init__(api_obj);
 
-    def dir(self, path="", startIdx=0, listSize=16):
+    def dir(self, path="", startIndex=0, listSize=16):
         """
         Get a directory listing from the path specified
 
@@ -1243,7 +1285,7 @@ class Data(APIChild):
         in `numObjectsInDir`.
 
         To request the next 'page' of objects in the directory.
-        make another call to `dir` with `startIdx=N*listSize`,
+        make another call to `dir` with `startIndex=N*listSize`,
         where N is the desired 'page number'.
 
         :raises ValueError: if path is not a string object
@@ -1260,7 +1302,7 @@ class Data(APIChild):
 
         data_obj = {
             "path" : path,
-            "index" : startIdx,
+            "index" : startIndex,
             "list" : listSize
         }
 
@@ -1331,8 +1373,8 @@ class Data(APIChild):
         response = self.getRequest("data/download", data_obj)
 
         # Write file
-        with open(filename, 'w') as fh:
-            fh.write(response.text)
+        with open(filename, 'wb') as fh:
+            fh.write(response.text.encode("utf-8"))
         
 
     class DirectoryListing:
@@ -1357,6 +1399,20 @@ class Data(APIChild):
             self.numObjectsInList = 0
 
             self.load(resp_json)
+
+        def __repr__(self):
+            str = "DirectoryListing <0x{:x}> with {} files and {} directories\nof a total of {} file system objects.\n\n".format(id(self), len(self.files), len(self.directories), self.numObjectsInDir)
+            if len(self.directories) > 0:
+                str += "\tDirectories\n";
+                for direc in self.directories:
+                    str += "\t\t{} [{} bytes, last modified {}]\n".format(direc.name, direc.size, direc.date)
+                str += "\n"
+            if len(self.files) > 0:
+                str += "\tFiles\n"
+                for fil in self.files:
+                    str += "\t\t{} [{} bytes, last modified {}]\n".format(fil.name, fil.size, fil.date)
+                str += "\n"
+            return str
             
         def load(self, resp_json):
 

@@ -1,0 +1,314 @@
+; ***********************************************
+; Configuration file for ApRES - Profiling
+; ***********************************************
+;******************************************************************************
+; Configuration settings relevant for Attended Mode
+;
+;   Always start the Web Server (ie always go into Attended Mode), regardless
+;   of an active Ethernet connection. Default 0.
+AlwaysAttended=1
+; Changed to below 15/04/21 for power test
+;AlwaysAttended=0
+;
+;   Check for an Ethernet connection on power-up (1=yes; 0=no)
+;   Default=1
+CheckEthernet=3
+;Changed to below 15/04/21 for power test
+;CheckEthernet=0
+;
+;   When used in attended mode, and doing a Trial Sub-Burst, the maximum
+;   depth that is displayed on the FFT (A-scope) display. This can be
+;   overwritten from the browser
+maxDepthToGraph=200
+;
+;******************************************************************************
+;******************************************************************************
+; Configuration settings relevant for both Attended and Unattended modes
+;
+
+;   Number of samples per burst (>=10)
+;N_ADC_SAMPLES=40000
+; SamplingFreqMode 0->40kHz 1->80kHz
+SamplingFreqMode=0
+;
+; Every NData burts, one will be averaged, analysed and the results reported via
+; Iridium. Starts with the first burst of the deployment.
+NData=0
+;
+; Triples define depth intervals to search for maxima to report on. Up to a max
+; of four triples allowed.  Each Triple is used in a Matlab sense to define intervals
+; (A,B,C interpreted as A:B:C). Maximum of 64 intervals allowed.
+Triples=70,10,200,200,20,600,600,5,630,5
+;
+;   WatchDog task behaviour. Time in seconds of operation after which;
+;   radar will be reset.  Assumption is that a fault has occurred if radar
+;   is active for longer than this time.  Watchdog does not operate in
+;   attended mode.  If Watchdog time is set to 0, then the default of 3600
+;   seconds is used.  If set to -1, then Watchdog task is disabled.
+WATCHDOG_TASK_SECS=3600
+;
+; Time for the system to settle down
+InterChirpDelay=50
+; Don't record first few chirps
+Settle_Cycles=0
+;
+;   Number of sub-bursts in a burst (>=0)
+;   Default=10
+NSubBursts=10
+;
+;  Are all the chirps from this burst to be stored individually (0),
+;  averaged (1) or stacked (2)
+Average=0
+;
+;   Burst repetition period (integer seconds) (>0).  Interpretation depends
+;   on IntervalMode.  If IntervalMode = 0 (default), RepSecs is time from
+;   start of one burst to the start of the next.  If IntervalMode = 1,
+;   RepSecs is interval between end of one burst and start of next.
+RepSecs=10
+IntervalMode=1
+;
+;   Maximum length of data file before another one started (>=1,000,000)
+;   Default=10,000,000
+MAX_DATA_FILE_LENGTH=100000
+;
+; Whether a logging file is to be maintained (default = no (0)).
+LOGON=1
+;
+;   Number of combinations of attenuator settings to be used
+nAttenuators=1
+;
+;   Attenuator setting sequences (dB) (>0, <=31.5)
+;   Defaults=30dB.
+Attenuator1=30,25,30,30
+AFGain=-4,6,-4,-10
+;
+;   In unattended mode, does the radar sleep between bursts (default, 0),
+;   or does it wait (1).  In the sleep case the system is powered down
+;   between bursts and draws a low current (<200uA). Otherwise system
+;   remains powered and draws ~1 Amp at 6V, 0.45 Amp at 12 V.
+SleepMode=0
+;
+;   Time out for GPS receiver for each burst (0-255 seconds)?
+;   Default is 0 - do not attempt to obtain fix before each burst. 
+GPSon=30
+;
+;   Undertake daily housekeeping (GPS clock check, Iridium exchange and
+;   memory card check? (1 = yes, 0 = no)
+Housekeeping=0
+;
+;   If GPS fix obtained during daily housekeeping, synchronise radar clock
+;   to GPS time (only if Housekeeping=1)? (1 = yes, 0 = no)
+SyncGPS=0
+;
+;   If Housekeeping=1, is Iridium messaging enabled? (1 = yes, 0 = no)
+;   Default = 0
+Iridium=0
+; Config Rhone19test_a (loop test with c = c0 * 0.81)
+;   Sweep:          20 MHz to 40 MHz
+;   T:              2.5ms
+;   BW:             20 MHz
+;   fstep:          40 kHz
+;   R(fd=20kHz):    303 m
+;   dR:             6.075 m
+;
+; DDS programming strings
+;Reg00=00000008
+;Reg01=000C0820
+;Reg02=0D1F41C8
+;Reg0B=0A3D70A4051EB852
+;Reg0C=00029F1700029F17
+;Reg0D=04E204E2
+
+; Config Rhone19test_b (loop test with c = c0 * 0.81)
+;   Sweep:          20 MHz to 40 MHz
+;   T:              5ms
+;   BW:             20 MHz
+;   fstep:          40 kHz
+;   R(fd=20kHz):    607.5 m
+;   dR:             6.075 m
+;
+; DDS programming strings
+;Reg00=00000008
+;Reg01=000C0820
+;Reg02=0D1F41C8
+;Reg0B=0A3D70A4051EB852
+;Reg0C=00014F8B00014F8B
+;Reg0D=04E204E2
+
+; Config Rhone19test_c (loop test with c = c0 * 0.81)
+;   Sweep:          20 MHz to 40 MHz
+;   T:              5ms
+;   BW:             20 MHz
+;   fstep:          10 kHz
+;   R(fd=20kHz):    1215 m
+;   dR:             6.075 m
+;
+; DDS programming strings
+;Reg00=00000008
+;Reg01=000C0820
+;Reg02=0D1F41C8
+;Reg0B=0A3D70A4051EB852
+;Reg0C=0000A7C60000A7C6
+;Reg0D=04E204E2
+
+; Config Rhone19test_d (loop test with c = c0 * 0.81)
+;   Sweep:          20 MHz to 40 MHz
+;   T:              1 s
+;   BW:             20 MHz
+;   fstep:          1 kHz
+;   R(fd=20kHz):    243 km
+;   dR:             6.075 m
+;
+; DDS programming strings
+;Reg00=00000008
+;Reg01=000C0820
+;Reg02=0D1F41C8
+;Reg0B=0A3D70A4051EB852
+;Reg0C=000010C7000010C7
+;Reg0D=30D430D4
+
+; Config Rhone19a - 250m Optimal Depth
+;   Sweep:          20 MHz to 40 MHz
+;   er:             3.1
+;   T:              0.01 s
+;   BW:             20 MHz
+;   fstep:          40 kHz
+;   R(fd=20kHz):    851 m
+;   dR:             6.075 m
+;
+; DDS programming strings
+;Reg00=00000008
+;Reg01=000C0820
+;Reg02=0D1F41C8
+;Reg0B=0A3D70A4051EB852
+;Reg0C=00029F1700029F17
+;Reg0D=13881388
+
+; Config Rhone19b - 266m Optimal Depth
+;   Sweep:          10 MHz to 20 MHz
+;   er:             3.1
+;   T:              0.00625 s
+;   BW:             10 MHz
+;   fstep:          40 kHz
+;   R(fd=20kHz):    1064 m
+;   dR:             8.51 m
+;
+; DDS programming strings
+;Reg00=00000008
+;Reg01=000C0820
+;Reg02=0D1F41C8
+;Reg0B=051EB852028F5C29
+;Reg0C=00029F1700029F17
+;Reg0D=13881388
+
+; Config Rhone19c - 266m Optimal Depth (slower ramp)
+;   Sweep:          10 MHz to 20 MHz
+;   er:             3.1
+;   T:              0.0625 s
+;   BW:             10 MHz
+;   fstep:          4 kHz
+;   R(fd=20kHz):    1064 m
+;   dR:             8.51 m
+;
+; DDS programming strings
+;Reg00=00000008
+;Reg01=000C0820
+;Reg02=0D1F41C8
+;Reg0B=051EB852028F5C29
+;Reg0C=0000431C0000431C
+;Reg0D=01F401F4
+
+; Config Rhone19d - 266m Optimal Depth
+;   Sweep:          15 MHz to 30 MHz
+;   er:             3.1
+;   T:              0.00882 s
+;   BW:             15 MHz
+;   fstep:          1.7 kHz
+;   R(fd=20kHz):    1001 m
+;   dR:             5.67 m
+;
+; DDS programming strings
+;Reg00=00000008
+;Reg01=000C0820
+;Reg02=0D1F41C8
+;Reg0B=07AE147B03D70A3D
+;Reg0C=00001C8500001C85
+;Reg0D=00FA00FA
+
+; Config Rhone19e - 250m Optimal Depth
+;   Sweep:          10 MHz to 30 MHz
+;   er:             3.1
+;   T:              0.0058 s
+;   BW:             20 MHz
+;   fstep:          3.4 kHz
+;   R(fd=20kHz):    1001 m
+;   dR:             4.26 m
+;
+; DDS programming strings
+;Reg00=00000008
+;Reg01=000C0820
+;Reg02=0D1F41C8
+;Reg0B=07AE147B028F5C29
+;Reg0C=000039D9000039D9
+;Reg0D=00FA00FA
+
+; DDS programming strings
+;Reg00=00000008
+;Reg01=000C0820
+;Reg02=0D1F41C8
+;Reg0B=0A3D70A4051EB852
+;Reg0C=0000476300004763
+;Reg0D=04E204E2
+
+; DDS programming strings
+;Reg00=00000008
+;Reg01=000C0820
+;Reg02=0D1F41C8
+;Reg0B=0A3D70A4051EB852
+;Reg0C=0000074800000748
+;Reg0D=04E204E2
+
+; DDS programming strings
+Reg00=00000008
+Reg01=000C0820
+Reg02=0D1F41C8
+Reg0B=0A3D70A4051EB852
+Reg0C=0000431C0000431C
+Reg0D=C350C350
+
+; 0.1 20 to 40 MHz
+; DDS programming strings
+;Reg00=00000008
+;Reg01=000C0820
+;Reg02=0D1F41C8
+;Reg0B=0A3D70A4051EB852
+;Reg0C=0000431C0000431C
+;Reg0D=13881388
+
+
+; 0.2s 20 to 40 MHz
+; DDS programming strings
+;Reg00=00000008
+;Reg01=000C0820
+;Reg02=0D1F41C8
+;Reg0B=0A3D70A4051EB852
+;Reg0C=0000218E0000218E
+;Reg0D=13881388
+
+; 0.5s 20 to 40 MHz
+; DDS programming strings
+;Reg00=00000008
+;Reg01=000C0820
+;Reg02=0D1F41C8
+;Reg0B=0A3D70A4051EB852
+;Reg0C=00000D6C00000D6C
+;Reg0D=13881388
+
+; 1s 20 to 40 MHz
+; DDS programming strings
+;Reg00=00000008
+;Reg01=000C0820
+;Reg02=0D1F41C8
+;Reg0B=0A3D70A4051EB852
+;Reg0C=000006B6000006B6
+;Reg0D=13881388

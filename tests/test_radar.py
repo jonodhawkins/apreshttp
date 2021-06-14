@@ -125,7 +125,7 @@ def test_radar_trial_burst_callback():
 
     tcallback = TestCallback();
 
-    api.radar.trialBurst(tcallback.setResponse, wait = True)
+    api.radar.trialBurst(tcallback.setResponse, wait=True)
 
     # tcallback.plot()
 
@@ -136,6 +136,13 @@ class TestCallback:
 
     def setResponse(self, resp):
         self.response = resp
+
+    def update(self, resp):
+        rjson = resp.json()
+        msg = rjson["status"]
+        if "chirpNumber" in rjson:
+            msg += " " + str(rjson["chirpNumber"])
+        print(msg)
 
     def plot(self):
         fig, axs = plt.subplots(1, 2)
@@ -168,7 +175,7 @@ def test_radar_burst():
     cb = TestCallback()
 
     # Get results
-    api.radar.results(cb.setResponse, wait=True)
+    api.radar.results(cb.setResponse, updateCallback = cb.update, wait=True)
 
     # Validate filename
     assert isinstance(cb.response.filename, str)
@@ -186,5 +193,5 @@ def test_radar_burst():
 
     # Try again - should get an error
     with pytest.raises(apreshttp.RadarBusyException):
-        api.radar.burst(filename)
+        api.radar.burst(filename) 
 
