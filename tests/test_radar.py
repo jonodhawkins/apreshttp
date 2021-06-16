@@ -22,6 +22,7 @@ def test_radar_config_get():
     assert config.nSubBursts != None
     assert len(config.afGain) > 0
     assert len(config.rfAttn) > 0
+    assert isinstance(config.state, str)
 
 def test_radar_config_set():
 
@@ -68,6 +69,13 @@ def test_radar_config_set():
 
     for i in range(len(config.rfAttn)):
         assert config.rfAttn[i] == list(rfValues.values())[i]
+
+    stateVarTemp = hex(random.getrandbits(32))[2:];
+    config = api.radar.config.set(stateVariable=stateVarTemp)
+
+    assert config.state == stateVarTemp
+
+    api.radar.config.set(stateVariable="")
 
     with pytest.raises(KeyError):
         # Try to set 4th attenuator value when only 3 are enabled
