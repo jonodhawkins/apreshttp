@@ -877,6 +877,28 @@ class Radar(APIChild):
             #: indicates whether the results are a trial or full burst
             self.type = response_json["type"]
 
+            if not "nAttenuators" in response_json:
+                raise BadResponseException("No key 'nAttenuators' found in results.")
+
+            self.nAttenuators = response_json["nAttenuators"]
+
+            if not "startFrequency" in response_json:
+                raise BadResponseException("No key 'startFrequency' found in results.")
+                
+            self.startFrequency = response_json["startFrequency"]
+            
+            if not "stopFrequency" in response_json:
+                raise BadResponseException("No key 'stopFrequency' found in results.")
+            
+            self.stopFrequency = response_json["stopFrequency"]
+
+            if not "period" in response_json:
+                raise BadResponseException("No key 'period' found in results.")
+
+            self.period = response_json["period"]
+            
+            self.bandwidth = self.stopFrequency - self.startFrequency
+
             if self.type == "trial":
 
                 self.__loadTrialParameters(response_json)
@@ -889,9 +911,6 @@ class Radar(APIChild):
                 raise BadResponseException("Invalid type '{type:s}'".format(type=self.type))
 
         def __loadTrialParameters(self, response_json):
-
-            if not "nAttenuators" in response_json:
-                raise BadResponseException("No key 'nAttenuators' found in results.")
 
             if not "nAverages" in response_json:
                 raise BadResponseException("No key 'nAverages' found in results.")
