@@ -802,7 +802,7 @@ class Radar(APIChild):
 
         raise ResultsTimeoutException
 
-    def burst(self, filename = None, stateVariable = None, callback = None, updateCallback = None, wait = True):
+    def burst(self, filename = None, userData = None, callback = None, updateCallback = None, wait = True):
         """
         Perform a measurement radar burst using the current config
 
@@ -842,8 +842,8 @@ class Radar(APIChild):
             "filename" : filename
         }
 
-        if isinstance(stateVariable, str):
-            data_obj["state"] = stateVariable
+        if isinstance(userData, str):
+            data_obj["userData"] = userData
 
         # Make a POST request to trial burst
         response = self.postRequest("radar/burst", data_obj, allow_redirects=False)
@@ -981,7 +981,7 @@ class Radar(APIChild):
             str += "\tnAverages    : {}\n".format(self.nAverages)
             str += "\tafGain       : {}\n".format(self.afGain)
             str += "\trfAttn       : {}\n".format(self.rfAttn)
-            str += "\tstateVariable: {}\n".format(self.state)
+            str += "\tuserData     : {}\n".format(self.userData)
             return str
 
         def get(self):
@@ -1028,13 +1028,13 @@ class Radar(APIChild):
                 raise BadResponseException("No rfAttn key in response.")
             if not "afGain" in response_json:
                 raise BadResponseException("No rfAttn key in response.")
-            if not "stateVariable" in response_json:
-                raise BadResponseException("No stateVariable key in response.")
+            if not "userData" in response_json:
+                raise BadResponseException("No userData key in response.")
 
             self.nAttenuators = response_json["nAttenuators"]
             self.nSubBursts = response_json["nSubBursts"]
             self.nAverages = response_json["nAverages"]
-            self.state = response_json["stateVariable"]
+            self.userData = response_json["userData"]
             # Create empty AF gain and RF attenuation arrays
 
             self.rfAttn = response_json["rfAttn"]
@@ -1051,7 +1051,7 @@ class Radar(APIChild):
 
         def set(
             self, nAtts=None, nAverages = None, nBursts=None, rfAttnSet=None, afGainSet=None,
-            txAnt=None, rxAnt=None, stateVariable = None
+            txAnt=None, rxAnt=None, userData = None
         ):
             """
             Updates the radar burst configuration with the given parameters
@@ -1066,8 +1066,8 @@ class Radar(APIChild):
             :type afGainSet: int, list, dict or `None`
             :param txAnt: If using a MIMO board, set the active transmit antennas
             :type txAnt: int or list
-            :param stateVariable: 32-char string representing the current radar task (printed to bursts)
-            :type stateVariable: str
+            :param userData: 32-char string representing the current radar task (printed to bursts)
+            :type userData: str
 
             :raises BadResponseException: If an unexpected status code was returned
             :raises DidNotUpdateException: If the config settings were not updated
@@ -1203,11 +1203,11 @@ class Radar(APIChild):
                     # Merge valid with data_obj
                     data_obj = {**data_obj, **valid_af}
 
-            if stateVariable != None:
-                if isinstance(stateVariable, str):
-                    data_obj["state"] = stateVariable
+            if userData != None:
+                if isinstance(userData, str):
+                    data_obj["userData"] = userData
                 else:
-                    ValueError("stateVariable should be of type str")
+                    ValueError("userData should be of type str")
 
             # Now deal with the request
             response = self.postRequest("radar/config", data_obj)
