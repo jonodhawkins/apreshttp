@@ -87,7 +87,7 @@ parameters will depend on this.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="apreshttp.Radar.burst">
-<span class="sig-name descname"><span class="pre">burst</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Radar.burst" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">burst</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">userData</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">updateCallback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Radar.burst" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform a measurement radar burst using the current config</p>
 <p>Attempts to start an asynchronous radar burst, using the
 current configuration.  Also retrieves configuration from the
@@ -101,6 +101,7 @@ radar from starting the burst.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>filename</strong> (<em>str</em>) – filename to be used when saving the burst to an SD card.</p></li>
 <li><p><strong>callback</strong> (<em>callable</em>) – callback function which accepts one argument of type API.Radar.Results</p></li>
+<li><p><strong>updateCallback</strong> (<em>callable</em>) – callback function executed on each results request (to provide progress updates)</p></li>
 <li><p><strong>wait</strong> (<em>boolean</em>) – If False, the request for results takes place in a new thread.</p></li>
 </ul>
 </dd>
@@ -121,7 +122,7 @@ radar from starting the burst.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="apreshttp.Radar.results">
-<span class="sig-name descname"><span class="pre">results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Radar.results" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">updateCallback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Radar.results" title="Permalink to this definition">¶</a></dt>
 <dd><p>Wait for results to be returned by the radar</p>
 <p>Calls the function <cite>callback</cite> when the api/radar/results page
 indicates that the chirp has finished.   If callback is <cite>None</cite>
@@ -133,8 +134,15 @@ indication that the radar should be reset.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>callback</strong> (<em>callable</em>) – callback function which accepts one argument of type API.Radar.Results</p></li>
+<li><p><strong>updateCallback</strong> (<em>callable</em>) – callback function executed on each results request (to provide progress updates)</p></li>
 <li><p><strong>wait</strong> (<em>boolean</em>) – If False, the request for results takes place in a new thread.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>If wait = False, returns the thread instance executing the results code.  Otherwise, returns a results object if the results are obtained.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">threading.Thread</span></code></p>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><ul class="simple">
@@ -147,7 +155,7 @@ indication that the radar should be reset.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="apreshttp.Radar.trialBurst">
-<span class="sig-name descname"><span class="pre">trialBurst</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Radar.trialBurst" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">trialBurst</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">updateCallback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Radar.trialBurst" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform a trial burst using the current configuration</p>
 <p>Attempts to start an asynchronous trial radar burst, using the
 current configuration. Also retrieves configuration from the
@@ -179,6 +187,7 @@ example code:</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>callback</strong> – If provided, callback is executed when results are available.  The callback function should take a single argument of type requests.response</p></li>
+<li><p><strong>updateCallback</strong> (<em>callable</em>) – callback function executed on each results request (to provide progress updates)</p></li>
 <li><p><strong>wait</strong> (<em>boolean</em>) – If callback is provided, should the function halt execution or wait in a seperate thread</p></li>
 </ul>
 </dd>
@@ -275,14 +284,14 @@ a <a class="reference internal" href="#apreshttp.Radar.Config.get" title="apresh
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="apreshttp.Radar.Config.rfGain">
-<span class="sig-name descname"><span class="pre">rfGain</span></span><a class="headerlink" href="#apreshttp.Radar.Config.rfGain" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="apreshttp.Radar.Config.rfAttn">
+<span class="sig-name descname"><span class="pre">rfAttn</span></span><a class="headerlink" href="#apreshttp.Radar.Config.rfAttn" title="Permalink to this definition">¶</a></dt>
 <dd><p>AF gain settings (list of float)</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="apreshttp.Radar.Config.set">
-<span class="sig-name descname"><span class="pre">set</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nAtts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nBursts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rfAttnSet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">afGainSet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">txAnt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rxAnt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Radar.Config.set" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">set</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nAtts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nAverages</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nBursts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rfAttnSet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">afGainSet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">txAnt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rxAnt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">userData</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Radar.Config.set" title="Permalink to this definition">¶</a></dt>
 <dd><p>Updates the radar burst configuration with the given parameters</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -292,6 +301,7 @@ a <a class="reference internal" href="#apreshttp.Radar.Config.get" title="apresh
 <li><p><strong>rfAttnSet</strong> (int, list, dict or <cite>None</cite>) – Set the values of the ApRES RF attenuator.  If using a dictionary, keys should be “rfAttn1”, “rfAttn2”, etc. and may be excluded if no update is desired.</p></li>
 <li><p><strong>afGainSet</strong> (int, list, dict or <cite>None</cite>) – Set the values of the ApRES AF gain.  If using a dictionary, keys should be “afGain1”, “afGain2”, etc. and may be exlcuded if no update is desired.</p></li>
 <li><p><strong>txAnt</strong> (<em>int</em><em> or </em><em>list</em>) – If using a MIMO board, set the active transmit antennas</p></li>
+<li><p><strong>userData</strong> (<em>str</em>) – 32-char string representing the current radar task (printed to bursts)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises</dt>

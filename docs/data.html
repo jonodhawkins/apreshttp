@@ -68,7 +68,7 @@ meet this conditions.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="apreshttp.Data.dir">
-<span class="sig-name descname"><span class="pre">dir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startIdx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">listSize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Data.dir" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">dir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startIndex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">listSize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.Data.dir" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get a directory listing from the path specified</p>
 <p>Returns a <a class="reference internal" href="#apreshttp.Data.DirectoryListing" title="apreshttp.Data.DirectoryListing"><code class="xref py py-class docutils literal notranslate"><span class="pre">apreshttp.Data.DirectoryListing</span></code></a>
 object representing the files and directories in the
@@ -78,7 +78,7 @@ in the directory, the returned list will be truncated
 and the total number of objects in the directory stored
 in <cite>numObjectsInDir</cite>.</p>
 <p>To request the next ‘page’ of objects in the directory.
-make another call to <cite>dir</cite> with <cite>startIdx=N*listSize</cite>,
+make another call to <cite>dir</cite> with <cite>startIndex=N*listSize</cite>,
 where N is the desired ‘page number’.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Raises</dt>

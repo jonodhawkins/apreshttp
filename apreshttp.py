@@ -929,10 +929,12 @@ class Radar(APIChild):
             #: chirp data for each attenuator setting (list of lists)
             self.chirp = [];
 
-            # Iterate over number of attenuators
-            for attnIdx in range(self.nAttenuators):
-                self.histogram.append(response_json["histogram" + str(attnIdx+1)])
-                self.chirp.append([v / 65536 * 2.5 for v in response_json["chirp" + str(attnIdx+1)]])
+            # Iterate over number of attenuators and assign chirps/histogram
+            for hist in response_json["histogram"]:
+                self.histogram.append(hist)
+
+            for chirp in response_json["chirp"]:
+                self.chirp.append([v / 65536 * 2.5 for v in chirp])
 
         def __loadBurstParameters(self, response_json):
 

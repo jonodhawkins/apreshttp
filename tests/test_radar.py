@@ -135,7 +135,7 @@ def test_radar_trial_burst_callback():
 
     api.radar.trialBurst(tcallback.setResponse, wait=True)
 
-    # tcallback.plot()
+    tcallback.plot()
 
 class TestCallback:
 

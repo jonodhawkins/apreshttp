@@ -119,6 +119,12 @@ system <cite>print</cite> function.</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apreshttp.API.resultsInterval">
+<span class="sig-name descname"><span class="pre">resultsInterval</span></span><a class="headerlink" href="#apreshttp.API.resultsInterval" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interval between requests for results in seconds</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="apreshttp.API.setKey">
 <span class="sig-name descname"><span class="pre">setKey</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.API.setKey" title="Permalink to this definition">¶</a></dt>
@@ -195,7 +201,7 @@ a complete URL, i.e.</p>
 <span class="sig-name descname"><span class="pre">getRequest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_obj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.APIChild.getRequest" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform a GET request to the URL, passing an API key and data</p>
 <p>The URL should be a valid ApRES HTTP API URL as described in
-<a class="reference internal" href="routes.html#api-routes"><span class="std std-ref">ApRES HTTP API Routes</span></a>, without the <cite>api/</cite> or root prefix.  If the
+<code class="xref any docutils literal notranslate"><span class="pre">api_routes</span></code>, without the <cite>api/</cite> or root prefix.  If the
 URL is not valid then a NotFoundException is raised.</p>
 <p>HTTP arguments can be passed using the <cite>data_obj</cite> parameter as
 a dictionary, containing named arguments ([“name”]=value).
@@ -219,7 +225,7 @@ same as requesting a URL with a query string appended with</p>
 <span class="sig-name descname"><span class="pre">postRequest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_obj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">files_obj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apreshttp.APIChild.postRequest" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform a POST request to the URL, passing an API key and data</p>
 <p>The URL should be a valid ApRES HTTP API URL as described in
-<a class="reference internal" href="routes.html#api-routes"><span class="std std-ref">ApRES HTTP API Routes</span></a>, without the <cite>api/</cite> or root prefix.  If the
+<code class="xref any docutils literal notranslate"><span class="pre">api_routes</span></code>, without the <cite>api/</cite> or root prefix.  If the
 URL is not valid then a NotFoundException is raised.</p>
 <p>HTTP arguments can be passed using the <cite>data_obj</cite> parameter as
 a dictionary, containing named arguments ([“name”]=value).

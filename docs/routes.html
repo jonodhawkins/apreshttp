@@ -46,62 +46,286 @@
           <div class="body" role="main">
             
   <section id="apres-http-api-routes">
-<span id="api-routes"></span><h1>ApRES HTTP API Routes<a class="headerlink" href="#apres-http-api-routes" title="Permalink to this headline">¶</a></h1>
+<h1>ApRES HTTP API Routes<a class="headerlink" href="#apres-http-api-routes" title="Permalink to this headline">¶</a></h1>
 <p>All routes are postfixed to <cite>http://[radar IP/hostname]/api/</cite></p>
 <section id="system-routes">
 <h2>System Routes<a class="headerlink" href="#system-routes" title="Permalink to this headline">¶</a></h2>
 <p>Related to system-level configuration and management</p>
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 36%" />
-<col style="width: 64%" />
-</colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>API Route</p></th>
-<th class="head"><p>Description</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>system/reset</p></td>
-<td><p>Reset the ApRES</p></td>
-</tr>
-<tr class="row-odd"><td><p>system/housekeeping/status</p></td>
-<td><p>Get the current ApRES status</p></td>
-</tr>
-<tr class="row-even"><td><p>system/housekeeping/config</p></td>
-<td><p>Download or upload a new system config.ini file</p></td>
-</tr>
-</tbody>
-</table>
+<section id="api-system-reset">
+<h3><cite>api/system/reset</cite><a class="headerlink" href="#api-system-reset" title="Permalink to this headline">¶</a></h3>
+<p>Resets the ApRES radar, which may be used to attempt to
+resolve RAM issues or an unresponsive radar motherboard
+remotely.</p>
+<hr class="docutils" />
+<p><strong>Method:</strong> POST</p>
+<p><strong>Response Code:</strong> 202 Accepted.  No reset can be guaranteed</p>
+<p><strong>Response:</strong> [application/json] reset time and message</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span>{
+    &quot;message&quot; : str,
+    &quot;time&quot; :    datetime str in YYYY-MM-DD HH:mm:ss
+}
+</pre></div>
+</div>
+</section>
+<section id="api-system-housekeeping-status">
+<h3><cite>api/system/housekeeping/status</cite><a class="headerlink" href="#api-system-housekeeping-status" title="Permalink to this headline">¶</a></h3>
+<p>Gets the system status of the ApRES radar.  Includes
+real-time clock, GPS and battery information.</p>
+<hr class="docutils" />
+<p><strong>Method:</strong> GET</p>
+<p><strong>Response Code:</strong> 200 OK</p>
+<p><strong>Response:</strong> [application/json] system status object</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span>{
+    &quot;batteryVoltage&quot;    : float,
+    &quot;timeVAB&quot;           : datetime str in YYYY-MM-DD HH:mm:ss,
+    &quot;timeGPS&quot;           : datetime str in YYYY-MM-DD HH:mm:ss,
+    &quot;latitude&quot;          : float latitude in decimal format,
+    &quot;longitude&quot;         : float longitude in decimal format
+}
+</pre></div>
+</div>
+<p>If the GPS is unavailable, <code class="docutils literal notranslate"><span class="pre">timeGPS</span></code> will be set to
+and empty string, while latitude and longitude will be
+set to zero.</p>
+</section>
+<section id="api-system-housekeeping-config">
+<h3><cite>api/system/housekeeping/config</cite><a class="headerlink" href="#api-system-housekeeping-config" title="Permalink to this headline">¶</a></h3>
+<p>Used to get the current system <cite>config.ini</cite> configuration
+file, or update it to a new version.</p>
+<p><strong>Note:</strong> Updated configuration files will not take effect
+unless the radar is restarted.</p>
+<hr class="docutils" />
+<p><strong>Method:</strong> GET</p>
+<p><strong>Response Code:</strong></p>
+<ul class="simple">
+<li><p>200 OK (config.ini exists)</p></li>
+<li><p>404 Not Found if config.ini does not exist.</p></li>
+<li><p>500 Internal Server Error if not filesystem is found on
+the ApRES</p></li>
+</ul>
+<p><strong>Response:</strong> [text/plain] HTTP file transfer of config.ini</p>
+<hr class="docutils" />
+<p><strong>Method:</strong> POST</p>
+<p><strong>Response Code:</strong></p>
+<ul class="simple">
+<li><p>201 Created (file uploaded and renamed)</p></li>
+<li><p>400 Bad Request (no file uploaded)</p></li>
+</ul>
+<p><strong>Response:</strong> [text/plain] HTTP file transfer of the updated config.ini</p>
+</section>
 </section>
 <section id="radar-routes">
 <h2>Radar Routes<a class="headerlink" href="#radar-routes" title="Permalink to this headline">¶</a></h2>
 <p>Related to radar-level configuration and performing bursts</p>
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 36%" />
-<col style="width: 64%" />
-</colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>API Route</p></th>
-<th class="head"><p>Description</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>radar/config</p></td>
-<td><p>Get or set the current radar burst configuration</p></td>
-</tr>
-<tr class="row-odd"><td><p>radar/trial-burst</p></td>
-<td><p>Perform a trial burst with the current config</p></td>
-</tr>
-<tr class="row-even"><td><p>radar/burst</p></td>
-<td><p>Perform a burst with the current config</p></td>
-</tr>
-<tr class="row-odd"><td><p>radar/results</p></td>
-<td><p>Get results from the latest trial burst</p></td>
-</tr>
-</tbody>
-</table>
+<section id="api-radar-config">
+<h3><cite>api/radar/config</cite><a class="headerlink" href="#api-radar-config" title="Permalink to this headline">¶</a></h3>
+<p>Returns the current radar burst configuration, in terms of the
+number of attenuator settings to use, averaging, number of
+sub bursts, RF attenuator and AF gain settings, transmit and
+receive antenna selection and user-data.</p>
+<hr class="docutils" />
+<p><strong>Method:</strong> GET</p>
+<p><strong>Response Code:</strong></p>
+<ul class="simple">
+<li><p>200 OK</p></li>
+</ul>
+<p><strong>Response:</strong> [application/json] config object</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span>{
+    &quot;rfAttn&quot;        : list of floats, RF attenuator settings,
+    &quot;afGain&quot;        : list of ints, AF gain settings,
+    &quot;nSubBursts&quot;    : int, number of chirps per &#39;burst&#39; and attn. setting,
+    &quot;nAttenuators&quot;  : int, number of attenuator settings [1 to 4],
+    &quot;nAverages&quot;     : int, number of chirps to stack in trial burst mode,
+    &quot;txAntenna&quot;     : list of ints, MIMO transmit antenna selection,
+    &quot;rxAntenna&quot;     : list of ints, MIMO receive antenna selection,
+    &quot;userData&quot;      : str, user-defined string appended to burst file headers
+}
+</pre></div>
+</div>
+<p>If the <code class="docutils literal notranslate"><span class="pre">debug=1</span></code> HTTP parameter is passed to the HTTP request
+an additional property of the JSON object will be assigned</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span># with api/radar/config?debug=1
+{
+    ...
+        other config properties
+    ...,
+    &quot;state&quot; : int, debug radar state
+}
+</pre></div>
+</div>
+<hr class="docutils" />
+<p><strong>Method:</strong> POST</p>
+<p><strong>Response Code:</strong></p>
+<ul class="simple">
+<li><p>200 OK (if burst configruation is updated successfully)</p></li>
+<li><p>400 Bad Request (if HTTP parameters are malformed)</p></li>
+</ul>
+<p><strong>Parameters:</strong></p>
+<ul class="simple">
+<li><p><em>nAttenuators</em> [int, in range 1 to 4]</p></li>
+<li><p><em>nSubBursts</em> [int, greater than 1]</p></li>
+<li><p><em>nAverages</em></p></li>
+</ul>
+<p><strong>Response:</strong> [application/json] config object as for GET request</p>
+<p>If the request is malformed (i.e. 400 Bad Request) then an error message
+is returned.  See [LINK] for more information.</p>
+</section>
+<section id="api-radar-trial-burst">
+<h3><cite>api/radar/trial-burst</cite><a class="headerlink" href="#api-radar-trial-burst" title="Permalink to this headline">¶</a></h3>
+<p>Performs a trial burst with the radar.  If <cite>nAverages</cite> in the radar
+configuration is set to greater than 1, then <cite>nAverages</cite> chirps are performed
+and their results are averaged.  Results from the trial bursts can be
+retrieved from the radar using the <code class="docutils literal notranslate"><span class="pre">api/radar/results</span></code> route.</p>
+<hr class="docutils" />
+<p><strong>Method:</strong> POST</p>
+<p><strong>Response Code:</strong></p>
+<ul class="simple">
+<li><p>303 See other (if the trial burst is started, with redirect to results URL)</p></li>
+<li><p>403 Forbidden (The radar is already performing a burst so cannot continue)</p></li>
+</ul>
+</section>
+<section id="api-radar-burst">
+<h3><cite>api/radar/burst</cite><a class="headerlink" href="#api-radar-burst" title="Permalink to this headline">¶</a></h3>
+<p>Performs a full burst with the radar, with the data saved to the optional
+filename provided.</p>
+<hr class="docutils" />
+<p><strong>Method:</strong> POST</p>
+<p><strong>Parameters:</strong></p>
+<ul class="simple">
+<li><p><em>filename</em> [str, filename to save data to]</p></li>
+<li><p><em>userData</em> [str, 32 char user data for file]</p></li>
+</ul>
+<p><strong>Response Code:</strong></p>
+<ul class="simple">
+<li><p>303 See Other (Redirect to the results URL if the burst has started)</p></li>
+<li><p>403 Forbidden (The radar is already performing a burst so cannot continue)</p></li>
+<li><p>403 Forbidden (The filename provided already exists)</p></li>
+</ul>
+<hr class="docutils" />
+<p><strong>Method:</strong> POST</p>
+<p><strong>Response Code:</strong></p>
+<ul class="simple">
+<li><p>303 See other (if the trial burst is started, with redirect to results URL)</p></li>
+<li><p>403 Forbidden (The radar is already performing a burst so cannot continue)</p></li>
+</ul>
+</section>
+<section id="api-radar-results">
+<h3><cite>api/radar/results</cite><a class="headerlink" href="#api-radar-results" title="Permalink to this headline">¶</a></h3>
+<p>If available, retrieves results from the radar from a trial burst or returns
+the filename of the data file with the latest burst.</p>
+<hr class="docutils" />
+<p><strong>Method:</strong> GET</p>
+<p><strong>Response Code:</strong></p>
+<ul class="simple">
+<li><p>200 OK</p></li>
+</ul>
+<p><strong>Response:</strong> [application/json]</p>
+<p>If the radar is idle, computing histograms or has an unknown state</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span>{
+    &quot;status&quot;    : str &quot;idle&quot; | &quot;histograms&quot; | &quot;unknown&quot;
+}
+</pre></div>
+</div>
+<p>If the radar is chirping, from either a trial burst or full burst</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span>{
+    # present for all burst types
+    &quot;status&quot;        : str &quot;chirping&quot;,
+    &quot;type&quot;          : str &quot;trial&quot; | &quot;burst&quot; depending on burst type
+    # only present for full burst indicating sub burst count
+    &quot;chirpNumber&quot;   : int
+}
+</pre></div>
+</div>
+<p>If the radar has finished a trial or full burst</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span>{
+    # present for all results
+    &quot;status&quot;        : &quot;finished&quot;,
+    &quot;type&quot;          : &quot;trial&quot; | &quot;burst&quot;,
+    &quot;nAttenuators&quot;  : int, number of attenuator settings,
+    &quot;rfAttn&quot;        : list (nAttenuators length) of list of floats,
+    &quot;afGain&quot;        : list (nAttenuators length) of list of ints,
+    &quot;startFrequency&quot;: int, chirp start frequency in Hz
+    &quot;stopFrequency&quot; : int, chirp stop frequency in Hz
+    &quot;period&quot;        : int, chirp period in seconds
+    # present for full burst results only
+    &quot;nSubBursts&quot;    : int, number of sub bursts per attenuator setting,
+    &quot;filename&quot;      : str, file path to location of dataset
+    # present for trial burst results only
+    &quot;histogram&quot;     : list (nAttenuators length) of list of ints,
+    &quot;chirp&quot;         : list (nAttenuators length) of list of ints,
+    &quot;nAverages&quot;     : int, number of averages used
+}
+</pre></div>
+</div>
+</section>
+</section>
+<section id="data-routes">
+<h2>Data Routes<a class="headerlink" href="#data-routes" title="Permalink to this headline">¶</a></h2>
+<p>Related to download and browsing of file system</p>
+<section id="api-data-dir">
+<h3><cite>api/data/dir</cite><a class="headerlink" href="#api-data-dir" title="Permalink to this headline">¶</a></h3>
+<p>Returns a directory listing of either the root directory on the SD card or
+a specified folder.  The number of elements returned per request can be
+chosen with the <cite>list</cite> parameter, and the start index is given by the
+<cite>index</cite> parameter</p>
+<hr class="docutils" />
+<p><strong>Method:</strong> GET</p>
+<p><strong>Parameters:</strong></p>
+<ul class="simple">
+<li><p><em>index</em> [int, start index to list directory entries from]</p></li>
+<li><p><em>list</em> [int, number of directory entries per page]</p></li>
+<li><p><em>path</em> [str, path to file object to observe]</p></li>
+</ul>
+<p><strong>Response Code:</strong></p>
+<ul class="simple">
+<li><p>200 OK</p></li>
+<li><p>404 Not Found (i.e. file or directory not found)</p></li>
+</ul>
+<p><strong>Response:</strong> [application/json]</p>
+<p>If the path points to a file object</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span>{
+    &quot;index&quot;     : int, index of file object within list of directory elements,
+    &quot;dir&quot;       : int, 1 if the file object is a directory, 0 if a file,
+    &quot;timestamp&quot; : str, YYYY-MM-DD HH:mm:ss timestamp last modified datatime,
+    &quot;size&quot;      : int, size file object on SD card,
+    &quot;path&quot;      : str, full path to file object,
+    &quot;name&quot;      : str, name part of file path
+}
+</pre></div>
+</div>
+<p>Or if the path points to a directory</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span>{
+    &quot;path&quot;      : str, path to directory,
+    &quot;fileCount&quot; : int, total number of file objects in directory,
+    &quot;index&quot;     : int, start index for file objects listed in files,
+    &quot;list&quot;      : int, number of file objects in files,
+    &quot;length&quot;    : int, total number of file objects in directory,
+    &quot;files&quot;     : [
+        ...
+        list of JSON objects representing file objects (see above)
+        ...
+    ]
+}
+</pre></div>
+</div>
+</section>
+<section id="api-data-download">
+<h3><cite>api/data/download</cite><a class="headerlink" href="#api-data-download" title="Permalink to this headline">¶</a></h3>
+<p>Downloads a file from the file system, if the path exists</p>
+<hr class="docutils" />
+<p><strong>Method:</strong> GET</p>
+<p><strong>Parameters:</strong></p>
+<ul class="simple">
+<li><p><em>path</em> [str, path to file object]</p></li>
+</ul>
+<p><strong>Response Code:</strong></p>
+<ul class="simple">
+<li><p>200 OK</p></li>
+<li><p>403 Forbidden (cannot download a directory)</p></li>
+<li><p>404 File not found</p></li>
+</ul>
+<p><strong>Response:</strong> [file object]</p>
+</section>
 </section>
 </section>
 
@@ -115,8 +339,24 @@
   <h3><a href="index.html">Table of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">ApRES HTTP API Routes</a><ul>
-<li><a class="reference internal" href="#system-routes">System Routes</a></li>
-<li><a class="reference internal" href="#radar-routes">Radar Routes</a></li>
+<li><a class="reference internal" href="#system-routes">System Routes</a><ul>
+<li><a class="reference internal" href="#api-system-reset"><cite>api/system/reset</cite></a></li>
+<li><a class="reference internal" href="#api-system-housekeeping-status"><cite>api/system/housekeeping/status</cite></a></li>
+<li><a class="reference internal" href="#api-system-housekeeping-config"><cite>api/system/housekeeping/config</cite></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#radar-routes">Radar Routes</a><ul>
+<li><a class="reference internal" href="#api-radar-config"><cite>api/radar/config</cite></a></li>
+<li><a class="reference internal" href="#api-radar-trial-burst"><cite>api/radar/trial-burst</cite></a></li>
+<li><a class="reference internal" href="#api-radar-burst"><cite>api/radar/burst</cite></a></li>
+<li><a class="reference internal" href="#api-radar-results"><cite>api/radar/results</cite></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#data-routes">Data Routes</a><ul>
+<li><a class="reference internal" href="#api-data-dir"><cite>api/data/dir</cite></a></li>
+<li><a class="reference internal" href="#api-data-download"><cite>api/data/download</cite></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
