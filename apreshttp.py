@@ -767,8 +767,11 @@ class Radar(APIChild):
         # Define initiation time
         init_time = datetime.datetime.now()
 
+        nTx = sum(self.config.txAntenna)
+        nRx = sum(self.config.rxAntenna)
+
         # Calculate timeout (allow 2 seconds for each chirp)
-        timeoutSeconds = (self.config.nSubBursts + self.config.nAverages) * \
+        timeoutSeconds = (nTx * nRx) * (self.config.nSubBursts + self.config.nAverages) * \
                          self.config.nAttenuators * 2 + self.api.timeout
 
         self.api.debug("Getting results [Timeout = {timeout:f}".format(
@@ -1032,6 +1035,10 @@ class Radar(APIChild):
                 raise BadResponseException("No rfAttn key in response.")
             if not "userData" in response_json:
                 raise BadResponseException("No userData key in response.")
+            if not "txAntenna" in response_json:
+                raise BadResponseException("No txAntenna key in response.")
+            if not "rxAntenna" in response_json:
+                raise BadResponseException("No rxAntenna key in response.")
 
             self.nAttenuators = response_json["nAttenuators"]
             self.nSubBursts = response_json["nSubBursts"]
@@ -1041,6 +1048,9 @@ class Radar(APIChild):
 
             self.rfAttn = response_json["rfAttn"]
             self.afGain = response_json["afGain"]
+
+            self.txAntenna = tuple(response_json["txAntenna"])
+            self.rxAntenna = tuple(response_json["rxAntenna"])
 
             self.api.debug("NAtts: {}\nN(rfAttn): {}\nN(afGain): {}\n".format(self.nAttenuators, len(self.rfAttn), len(self.afGain)))
 
@@ -1170,37 +1180,46 @@ class Radar(APIChild):
             if txAnt != None:
                 # Check whether it is a tuple or array
                 if isinstance(txAnt, tuple) and len(txAnt) == 8:
-                    count = 1;
+                    count = 0
                     for v in txAnt:
                         if v != 0 and v != 1:
                             raise ValueError("Value at #{} in txAnt should be 0 or 1 only".format(count))
                         count = count + 1
-                    data_obj["txAntenna"] = txAnt
+                    if count > 0:
+                        txAntStr = [str(x) for x in txAnt]
+                        data_obj["txAntenna"] = ",".join(txAntStr)
+                    else:
+                        raise ValueError("Must have at least one rxAntenna enabled.")
                 else:
                     raise ValueError("txAnt should be an 8-element tuple.")
 
             if rxAnt != None:
                 # Check whether it is a tuple or array
                 if isinstance(rxAnt, tuple) and len(rxAnt) == 8:
-                    count = 1;
+                    count = 0
                     for v in rxAnt:
                         if v != 0 and v != 1:
                             raise ValueError("Value at #{} in rxAnt should be 0 or 1 only".format(count))
                         count = count + 1
-                    data_obj["rxAntenna"] = rxAnt
+
+                    if count > 0:
+                        rxAntStr = [str(x) for x in rxAnt]
+                        data_obj["rxAntenna"] = ",".join(rxAntStr)
+                    else:
+                        raise ValueError("Must have at least one rxAntenna enabled.")
                 else:
                     raise ValueError("rxAnt should be an 8-element tuple.")
 
             valid_rf = None
             if rfAttnSet != None:
-                valid_rf = self.parseRFAttnAFGain("rfAttn", rfAttnSet, nAtts)
+                valid_rf = self.parseRFAttnAFGain("rfAttn", rfAttnSet, nAtts or self.nAttenuators)
                 if len(valid_rf) > 0:
                     # Merge valid with data_obj
                     data_obj = {**data_obj, **valid_rf}
 
             valid_af = None
             if afGainSet != None:
-                valid_af = self.parseRFAttnAFGain("afGain", afGainSet, nAtts)
+                valid_af = self.parseRFAttnAFGain("afGain", afGainSet, nAtts or self.nAttenuators)
                 if len(valid_af) > 0:
                     # Merge valid with data_obj
                     data_obj = {**data_obj, **valid_af}

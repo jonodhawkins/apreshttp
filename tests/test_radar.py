@@ -80,27 +80,60 @@ def test_radar_config_set():
     with pytest.raises(KeyError):
         # Try to set 4th attenuator value when only 3 are enabled
         config = api.radar.config.set(nAtts = 3, rfAttnSet = {'rfAttn4':20})
-        # Need to succesfully update nAtts to 3 for the next test to work
-        config = api.radar.config.set(nAtts = 3)
+        
+    # Need to succesfully update nAtts to 3 for the next test to work
+    config = api.radar.config.set(nAtts = 3)
+
+    with pytest.raises(KeyError):
         # Try to set 4th gain when only 3 are enabled
         config = api.radar.config.set(afGainSet = {'afGain4':6})
 
     with pytest.raises(ValueError):
         # Try to do the same but with list argument
         config = api.radar.config.set(nAtts = 2, rfAttnSet = [10,20,30])
-        # Again, need to set the attenuators to 2
-        config = api.radar.config.set(nAtts = 2)
+    
+    # Again, need to set the attenuators to 2
+    config = api.radar.config.set(nAtts = 2)
+
+    with pytest.raises(ValueError):
         # Try to set the 3rd gain when nAtts = 2
         config = api.radar.config.set(afGainSet = [-14,-4,6])
+        
+    with pytest.raises(ValueError):
         # Using a list, only provide 2 out of 3 attenuation values
-        config = api.radar.config.set(nAtts = 3, rfAttnSet = [10,20])
-        # Update nAtts to 3
-        config = api.radar.config.set(nAtts = 3)
+        config = api.radar.config.set(nAtts = 3, rfAttnSet = [10,20])#
+        
+    # Update nAtts to 3
+    config = api.radar.config.set(nAtts = 3)
+        
+    with pytest.raises(ValueError):
         # Try setting afGain using a list
         config = api.radar.config.set(nAtts = 3, afGainSet = [-14,-4])
+        
+    with pytest.raises(ValueError):
         # nAtts should be 3, so these should fail
         config = api.radar.config.set(rfAttnSet = 9)
+        
+    with pytest.raises(ValueError):
         config = api.radar.config.set(afGainSet = -4)
+
+    # Try Tx and Rx antenna setting
+    # Choose two random between 1 and 255
+    randTxInt = random.getrandbits(8)
+    randTx = tuple([int((randTxInt & 2**x) >> x) for x in range(8)])
+    randRxInt = random.getrandbits(8)
+    randRx = tuple([int((randRxInt & 2**x) >> x) for x in range(8)])
+
+    config = api.radar.config.set(txAnt = randTx, rxAnt = randRx)
+    
+    assert config.txAntenna == randTx
+    assert config.rxAntenna == randRx
+
+    with pytest.raises(ValueError):
+        api.radar.config.set(txAnt=(0,0,0))
+    
+    with pytest.raises(ValueError):
+        api.radar.config.set(txAnt=[0,0,0,0,0,0,0,0])
 
 def test_radar_trial_burst():
 
@@ -109,14 +142,13 @@ def test_radar_trial_burst():
     api.setKey(API_KEY)
 
     # Try to perform a trial burst
-    api.radar.trialBurst()
+    api.radar.trialBurst(wait=False)
     print("Done first trial")
     with pytest.raises(apreshttp.RadarBusyException):
         print("Try error trial")
         api.radar.trialBurst()
 
-    # Wait for trial burst to finish
-    time.sleep(5)
+    api.radar.results()
 
 def test_radar_trial_burst_callback():
 
@@ -135,7 +167,7 @@ def test_radar_trial_burst_callback():
 
     api.radar.trialBurst(tcallback.setResponse, wait=True)
 
-    tcallback.plot()
+    # tcallback.plot()
 
 class TestCallback:
 
@@ -166,7 +198,7 @@ def test_radar_burst():
 
     api.setKey(API_KEY)
     
-    api.radar.config.set(nAtts = 1, nBursts = 5, rfAttnSet=10, afGainSet=6);
+    api.radar.config.set(nAtts = 1, nBursts = 5, rfAttnSet=10, afGainSet=6, txAnt=(1,0,0,0,0,0,0,0), rxAnt=(1,0,0,0,0,0,0,0));
 
     api.setKey("INVALID KEY")
 
