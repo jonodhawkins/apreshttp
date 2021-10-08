@@ -1,10 +1,7 @@
-from .context import apreshttp
+import apreshttp.base as apreshttp
 
 import os
-import datetime
-import pytest
 import random
-import time
 
 API_ROOT = "http://radar.localnet"
 API_KEY = "18052021"
