@@ -1,6 +1,7 @@
 import http.server
 import datetime
 import threading
+import socketserver
 import tempfile 
 
 class Server(http.server.HTTPServer):
@@ -42,17 +43,22 @@ class Server(http.server.HTTPServer):
             self.tempDir = None
             self.localFolder = localFolder
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        # Do some cleanup
-        if self.tempDir != None and isinstance(self.localFolder, tempfile.TemporaryDirectory):
-            self.localFolder.cleanup()
-
+        self.serverThread = None
+        self.running = False
 
     def start(self):
-        threading.Thread(target=self.serve_forever).start()
+        if self.serverThread == None:
+            self.running = True
+            self.serverThread = threading.Thread(target=self.serve_until_stop).start()
+        else:
+            raise Exception("Server has already been started.")
+
+    def stop(self):
+        self.running = False
+
+    def serve_until_stop(self):
+        while self.running:
+            self.handle_request()
 
     def addTestData(self, pathToData):
         pass
@@ -106,7 +112,7 @@ class APIRequestHandler(http.server.BaseHTTPRequestHandler):
         "radar" : {
             "config" : "doRadarConfig",
             "trial-burst" : "doRadarTrialBurst",
-            "radar-burst" : "doRadarBurst",
+            "burst" : "doRadarBurst",
             "results" : "doRadarResults"
         },
         "api" : {
