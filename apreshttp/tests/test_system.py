@@ -1,11 +1,11 @@
-import apreshttp.base as apreshttp 
+from .. import base as apreshttp 
 
 import os
 import datetime
 import pytest
 import random
 
-API_ROOT = "http://radar.localnet"
+API_ROOT = "http://localhost:8000" #"http://radar.localnet"
 API_KEY = "18052021"
 CONFIG_TEST_FILE = "config_test.ini"
 CONFIG_UPLOAD_FILE_A = "tests/upload_config_a.ini"
