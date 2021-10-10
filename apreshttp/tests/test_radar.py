@@ -1,11 +1,11 @@
-from .. import base as apreshttp 
+import apreshttp.base as apreshttp
 
 import datetime
 import matplotlib.pyplot as plt
 import pytest
 import random
 
-API_ROOT = "http://radar.localnet"
+API_ROOT = "http://localhost:8000" # "http://radar.localnet"
 API_KEY = "18052021"
 
 def test_radar_config_get():

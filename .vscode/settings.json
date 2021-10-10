@@ -1,8 +1,9 @@
 {
     "restructuredtext.confPath": "${workspaceFolder}\\docs_src\\source",
-    "python.testing.pytestArgs": [
-        "--pyargs apreshttp/tests"
-    ],
     "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true
+    "python.testing.pytestEnabled": true,
+    "python.testing.cwd": "",
+    "python.testing.pytestArgs": [
+        "apreshttp"
+    ]
 }

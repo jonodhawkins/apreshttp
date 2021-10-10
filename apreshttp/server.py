@@ -1,9 +1,14 @@
 import datetime
 import http.server
+import http.client
 import json
+import os
 import tempfile 
-import time
 import threading
+import urllib.parse
+import importlib.resources
+
+from requests.api import post
 
 class Server(http.server.HTTPServer):
     """
@@ -47,6 +52,12 @@ class Server(http.server.HTTPServer):
         else:
             self.tempDir = None
             self.localFolder = localFolder
+
+        # Check if there is a config file in the local folder
+        self.configPath = os.path.join(self.localFolder, "config.ini")
+        if not os.path.exists(self.configPath):
+            with open(self.configPath, 'w+') as confHandle:
+                confHandle.write(importlib.resources.open_text('apreshttp.tests', 'upload_config_a.ini').read()) 
 
         self.serverThread = None
         self.running = False
@@ -131,6 +142,20 @@ class APIRequestHandler(http.server.BaseHTTPRequestHandler):
     DATETIME_FORMAT_TEXT = "%Y-%m-%d %H:%M:%S"
     DATETIME_FORMAT_FILE = "%Y-%m-%d_%h%M%S"
 
+    API_KEY = 18052021
+
+    def authenticatePostRequest(self):
+        content_len = int(self.headers.get('content-length'))
+        post_body = self.rfile.read(content_len)
+
+        # Need to encode the response as ASCII before parsing to avoid 
+        # byte data out
+        parsed_data = urllib.parse.parse_qs(post_body.decode('ASCII'))
+
+        # This could be tidied up - check that there is actually a value
+        # in ['apikey'] before calling ['apikey'][0]
+        return 'apikey' in parsed_data and str(parsed_data['apikey'][0]) == str(self.API_KEY)
+
     def responseJSON(self, code, jsonDict={}):
         self.send_response(code)
         self.send_header("Content-type", "application/json")
@@ -167,14 +192,16 @@ class APIRequestHandler(http.server.BaseHTTPRequestHandler):
 
     def doSystemReset(self):
         if self.command == "POST":
-            self.responseJSON(
-                code = 202,
-                jsonDict = {
-                    "message" : "Resetting dummy ApRES",
-                    "time" : datetime.datetime.now().strftime(self.DATETIME_FORMAT)
-                }
-            )
-            time.sleep(5)
+            if not self.authenticatePostRequest():
+                self.response401()
+            else:
+                self.responseJSON(
+                    code = 202,
+                    jsonDict = {
+                        "message" : "Resetting dummy ApRES",
+                        "time" : datetime.datetime.now().strftime(self.DATETIME_FORMAT_TEXT)
+                    }
+                )
         else:
             self.response501()
 
@@ -186,8 +213,8 @@ class APIRequestHandler(http.server.BaseHTTPRequestHandler):
                 "batteryVoltage" : self.server.batteryVoltage,
                 "timeVAB" : self.server.getVABDatetime().strftime(self.DATETIME_FORMAT_TEXT),
                 "timeGPS" : "",
-                "latitude" : "",
-                "longitude" : ""
+                "latitude" : 0.0,
+                "longitude" : 0.0
             } 
             # Check GPS 
             if self.server.gpsValid:
@@ -201,10 +228,21 @@ class APIRequestHandler(http.server.BaseHTTPRequestHandler):
             self.response501()
 
     def doHousekeepingConfig(self):
-        self.send_response(200)
-        self.send_header("Content-type", "text/html")
-        self.end_headers()
-        self.wfile.write("Do housekeeping config".encode("utf-8"))
+        if self.command == "GET":
+            if os.path.exists(self.server.configPath):
+                self.send_response(200)
+                self.send_header("Content-type", "text/plain")
+                self.end_headers()
+                with open(self.server.configPath, 'r') as confFile:
+                    self.wfile.write(
+                        confFile.read().encode("utf-8")
+                    )
+            else:
+                self.response404()
+        elif self.command =="POST":
+            self.response500()
+        else:
+            self.response501()
 
     def doRadarConfig(self):
         self.send_response(200)
@@ -237,6 +275,14 @@ class APIRequestHandler(http.server.BaseHTTPRequestHandler):
         self.wfile.write("Do data download".encode("utf-8"))
 
     def do_GET(self):
+        self.handleAllRequests()
+
+    def do_POST(self):
+        # Validate authentication
+        self.handleAllRequests()
+
+    def handleAllRequests(self):
+        
         # Split path
         spath = self.path.split("/")
         if len(spath) < 3:
@@ -267,9 +313,6 @@ class APIRequestHandler(http.server.BaseHTTPRequestHandler):
             else:
                 self.do_404()
                 return
-
-    def do_POST(self):
-        pass
 
     def do_404(self):
         self.send_response(404)

@@ -1,4 +1,4 @@
-from .. import base as apreshttp 
+import apreshttp.base as apreshttp
 
 import os
 import random
