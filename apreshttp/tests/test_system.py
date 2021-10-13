@@ -4,12 +4,13 @@ import os
 import datetime
 import pytest
 import random
+import tempfile
 
 API_ROOT = "http://localhost:8000" #"http://radar.localnet"
 API_KEY = "18052021"
 CONFIG_TEST_FILE = "config_test.ini"
-CONFIG_UPLOAD_FILE_A = "tests/upload_config_a.ini"
-CONFIG_UPLOAD_FILE_B = "tests/upload_config_b.ini"
+CONFIG_UPLOAD_FILE_A = "apreshttp/tests/upload_config_a.ini"
+CONFIG_UPLOAD_FILE_B = "apreshttp/tests/upload_config_b.ini"
 
 def test_apichild_object():
 
@@ -105,7 +106,8 @@ def test_system_housekeeping_config_set():
     # Create API instance
     api = apreshttp.API(API_ROOT)
 
-    filename = "tests/" + hex(random.getrandbits(128))[2:] + ".ini"
+    tempDir = tempfile.TemporaryDirectory()
+    filename = os.path.join(tempDir.name, hex(random.getrandbits(128))[2:] + ".ini")
     TO_UPLOAD = CONFIG_UPLOAD_FILE_A
     # Check which config file is onboard
     try:

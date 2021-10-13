@@ -1,3 +1,4 @@
+import cgi
 import datetime
 import http.server
 import http.client
@@ -7,7 +8,7 @@ import tempfile
 import threading
 import urllib.parse
 import importlib.resources
-
+from requests_toolbelt.multipart import decoder as multipart_decoder
 from requests.api import post
 
 class Server(http.server.HTTPServer):
@@ -239,8 +240,19 @@ class APIRequestHandler(http.server.BaseHTTPRequestHandler):
                     )
             else:
                 self.response404()
-        elif self.command =="POST":
-            self.response500()
+        elif self.command =="POST":    
+            ctype, pdict = cgi.parse_header(self.headers.get('content-type'))
+            print(ctype)
+            if ctype == 'multipart/form-data':
+                multipart_data = multipart_decoder.MultipartDecoder.from_response(self.rfile.read())
+                print(multipart_data)
+                for part in multipart_data.parts:
+                    print(part.content)  # Alternatively, part.text if you want unicode
+                    print(part.headers)
+                pass
+            elif ctype == 'application/x-www-form-urlencoded':
+                pass
+            self.responseJSON(200,{"message":"done"})
         else:
             self.response501()
 
