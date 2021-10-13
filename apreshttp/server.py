@@ -240,19 +240,25 @@ class APIRequestHandler(http.server.BaseHTTPRequestHandler):
                     )
             else:
                 self.response404()
-        elif self.command =="POST":    
-            ctype, pdict = cgi.parse_header(self.headers.get('content-type'))
-            print(ctype)
-            if ctype == 'multipart/form-data':
-                multipart_data = multipart_decoder.MultipartDecoder.from_response(self.rfile.read())
-                print(multipart_data)
-                for part in multipart_data.parts:
-                    print(part.content)  # Alternatively, part.text if you want unicode
-                    print(part.headers)
-                pass
-            elif ctype == 'application/x-www-form-urlencoded':
-                pass
-            self.responseJSON(200,{"message":"done"})
+        elif self.command =="POST":
+            if not self.authenticatePostRequest():
+                self.response401()
+            else:
+                ctype, pdict = cgi.parse_header(self.headers.get('content-type'))
+                if ctype == 'multipart/form-data':
+                    sr = PseudoResponse(self.headers, self.rfile.read())
+                    multipart_data = multipart_decoder.MultipartDecoder.from_response(sr)
+                    # for part in multipart_data.parts:
+                        # print(part.content)  # Alternatively, part.text if you want unicode
+                        # print(part.headers)
+                    # print("")
+                    # print("Read multipart")
+                    self.responseJSON(200,{"message":"done"})
+                else:
+                # elif ctype == 'application/x-www-form-urlencoded':
+                    # print("Read application/x-www-form-encoded")
+                    # print(self.rfile.read())
+                    self.responseJSON(200,{"message":"done"})
         else:
             self.response501()
 
@@ -320,8 +326,6 @@ class APIRequestHandler(http.server.BaseHTTPRequestHandler):
                     # Call method
                     getattr(self, mdict[cpath])()
                     return
-                else:
-                    print(mdict[cpath])
             else:
                 self.do_404()
                 return
@@ -331,3 +335,19 @@ class APIRequestHandler(http.server.BaseHTTPRequestHandler):
         self.send_header("Content-type", "text/html")
         self.end_headers()
         self.wfile.write("Not Found".encode("utf-8"))
+
+class PseudoResponse:
+
+    def __init__(self, header, resp):
+        self.headers = header
+        self.content = resp
+
+if __name__ == "__main__":
+    srv = Server()
+    srv.start()
+    try:
+        while True:
+            pass
+    except KeyboardInterrupt:
+        srv.stop()
+    
