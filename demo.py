@@ -1,5 +1,5 @@
 # Demonstrate Capacbilities of apreshttp API
-import apreshttp
+import apreshttp.base as apreshttp
 import os
 import requests
 import tkinter as tk

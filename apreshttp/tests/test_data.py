@@ -46,7 +46,7 @@ def test_data_download():
             
     assert not os.path.exists("config.ini")
 
-    filename = "tests/" + hex(random.getrandbits(128))[2:] + ".ini"
+    filename = hex(random.getrandbits(128))[2:] + ".ini"
 
     try:
         api.data.download("config.ini", filename)
