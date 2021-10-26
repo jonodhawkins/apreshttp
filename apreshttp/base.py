@@ -1,5 +1,7 @@
 # Python wrapper for HTTP API to Control the ApRES Radar
 import datetime
+import http
+import json
 import math
 import os
 import re
@@ -434,30 +436,79 @@ class System(APIChild):
                 raise SystemHousekeepingException(
                 "Unexpected status code: {stat:d}".format(stat=response.status_code))
             else:
-                # Convert response body to JSON
+                return self.__statusObjectFromResponse(response)
+
+        def setTimeVAB(self, time):
+            """
+            Request an update of the VAB time.  Used to align the
+            VAB time with the a known timestamp.
+
+            :param time: new time for VAB
+            :type time: datetime
+            :raises BadResponseException: [description]
+            :return: If valid a :py:class:`apreshttp.System.Housekeeping.Status` object is returned
+            :rtype: apreshttp.System.Housekeeping.Status
+            """
+
+            # Strip date and time into local variables
+            dateObj = time.date()
+            timeObj = time.time()
+
+            # Form request data
+            reqData = {
+                "year" : dateObj.year,
+                "month" : dateObj.month,
+                "day" : dateObj.day,
+                "hour" : timeObj.hour, 
+                "minute" : timeObj.minute,
+                "second" : timeObj.second
+            }
+
+            # Form request
+            response = self.postRequest("system/housekeeping/settimevab", reqData)
+
+            if response.status_code == 400:
                 response_json = response.json()
-
-                self.api.debug(response.text)
-
-                # Check response has valid components
-                if not "batteryVoltage" in response_json:
-                    raise BadResponseException("No batteryVoltage key in response.")
-                if not "timeGPS" in response_json:
-                    raise BadResponseException("No timeGPS key in response.")
-                if not "timeVAB" in response_json:
-                    raise BadResponseException("No timeVAB key in response.")
-                if not "latitude" in response_json:
-                    raise BadResponseException("No latitude key in response.")
-                if not "longitude" in response_json:
-                    raise BadResponseException("No longitude key in response.")
-
-                return self.Status(
-                    response_json["batteryVoltage"],
-                    response_json["timeGPS"],
-                    response_json["timeVAB"],
-                    response_json["latitude"],
-                    response_json["longitude"],
+                msg = "No info."
+                if "errorMessage" in response_json:
+                    msg = response_json["errorMessage"]
+                return SystemHousekeepingException(
+                    "Bad request (400) - invalid timestamp provided. {msg:s}.".format(msg=msg)
                 )
+            elif response.status_code != 200:
+                return SystemHousekeepingException(
+                    "Unexpected status code: {stat:d}".format(stat=response.status_code)
+                )
+            else:
+                # Status code is 200 - success.
+                return self.__statusObjectFromResponse(response)
+
+        def __statusObjectFromResponse(self, response):
+
+            # Convert response body to JSON
+            response_json = response.json()
+
+            self.api.debug(response.text)
+
+            # Check response has valid components
+            if not "batteryVoltage" in response_json:
+                raise BadResponseException("No batteryVoltage key in response.")
+            if not "timeGPS" in response_json:
+                raise BadResponseException("No timeGPS key in response.")
+            if not "timeVAB" in response_json:
+                raise BadResponseException("No timeVAB key in response.")
+            if not "latitude" in response_json:
+                raise BadResponseException("No latitude key in response.")
+            if not "longitude" in response_json:
+                raise BadResponseException("No longitude key in response.")
+
+            return self.Status(
+                response_json["batteryVoltage"],
+                response_json["timeGPS"],
+                response_json["timeVAB"],
+                response_json["latitude"],
+                response_json["longitude"],
+            )
 
         class Status:
             """

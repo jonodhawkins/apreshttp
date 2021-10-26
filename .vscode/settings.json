@@ -8,10 +8,10 @@
     ],
     // "terminal.integrated.shellArgs.windows": ["-ExecutionPolicy", "Bypass"]
     "terminal.integrated.profiles.windows": {
-        "my-pwsh": {
-          "source": "PowerShell",
-          "args": ["-ExecutionPolicy", "Bypass"]
-        }
-      },
-      "terminal.integrated.defaultProfile.windows": "my-pwsh"
+      "my-pwsh": {
+        "source": "PowerShell",
+        "args": ["-ExecutionPolicy", "Bypass"]
+      }
+    },
+    "terminal.integrated.defaultProfile.windows": "my-pwsh"
 }
