@@ -912,7 +912,7 @@ class Radar(APIChild):
 
         # If callback is available then use that
         if callback != None:
-            return self.results(callback, wait)
+            return self.results(callback, updateCallback, wait)
 
     class Results:
         """
@@ -953,6 +953,12 @@ class Radar(APIChild):
             self.period = response_json["period"]
 
             self.bandwidth = self.stopFrequency - self.startFrequency
+
+            if "rfAttn" in response_json:
+                self.rfAttn = response_json["rfAttn"]
+
+            if "afGain" in response_json:
+                self.afGain = response_json["afGain"]
 
             if self.type == "trial":
 
@@ -1496,7 +1502,9 @@ class Data(APIChild):
 
         # Write file
         with open(filename, 'wb') as fh:
-            fh.write(response.text.encode("utf-8"))
+            fh.write(response.content)
+
+        return filename
         
 
     class DirectoryListing:

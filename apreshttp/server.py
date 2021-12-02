@@ -273,8 +273,8 @@ class APIRequestHandler(http.server.BaseHTTPRequestHandler):
             # Check GPS 
             if self.server.gpsValid:
                 statusDict["timeGPS"] = self.server.getGPSDatetime().strftime(self.DATETIME_FORMAT_TEXT)
-                statusDict["latitude"] = self.server.latitude
-                statusDict["longitude"] = self.server.longitude
+                statusDict["latitude"] = self.server.gpsLatitude
+                statusDict["longitude"] = self.server.gpsLongitude
 
             self.responseJSON(code = 200, jsonDict = statusDict)
 
@@ -492,8 +492,8 @@ class APIRequestHandler(http.server.BaseHTTPRequestHandler):
 
                 if self.server.burstType == "trial":
                     # present for trial burst results only
-                    responseDict["histogram"] = [[0,]*self.server.nAttenuators]
-                    responseDict["chirp"] = [[0,]*self.server.nAttenuators]
+                    responseDict["histogram"] = [[0,]*50]*self.server.nAttenuators
+                    responseDict["chirp"] = [[0,]*40000]*self.server.nAttenuators
                     responseDict["nAverages"] = self.server.nAverages
                 elif self.server.burstType == "burst":
                     responseDict["nSubBursts"] = self.server.nSubBursts

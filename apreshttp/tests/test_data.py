@@ -3,7 +3,8 @@ import apreshttp.base as apreshttp
 import os
 import random
 
-API_ROOT = "http://radar.localnet"
+# API_ROOT = "http://radar.localnet"
+API_ROOT = "http://192.168.1.1"
 API_KEY = "18052021"
 
 def test_data_list():
